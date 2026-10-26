@@ -8,7 +8,7 @@ use tauri_plugin_autostart::MacosLauncher;
 use crate::core::error::AppResult;
 use crate::core::settings::SettingsStore;
 use crate::core::source::Shutdown;
-use crate::core::{autostart, commands, hub, tray};
+use crate::core::{autostart, commands, hub, tray, updater};
 use crate::window::click_through::HitRegions;
 
 pub fn run() {
@@ -22,6 +22,7 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_drag::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| Ok(setup_app(app.handle())?))
         .invoke_handler(tauri::generate_handler![
             commands::list_activities,
@@ -51,6 +52,7 @@ fn setup_app(app: &AppHandle) -> AppResult<()> {
     tray::setup(app)?;
     window::setup(app)?;
     sources::spawn_all(app);
+    updater::spawn(app);
     Ok(())
 }
 

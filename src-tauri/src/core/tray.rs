@@ -4,17 +4,20 @@ use tauri::{AppHandle, Manager};
 
 use super::error::{AppError, AppResult};
 use super::hub::HubHandle;
+use super::updater;
 use crate::window::settings_window;
 
 const SETTINGS_ID: &str = "settings";
 const PAUSE_ID: &str = "pause";
+const UPDATE_ID: &str = "update";
 const QUIT_ID: &str = "quit";
 
 pub fn setup(app: &AppHandle) -> AppResult<()> {
     let settings_item = MenuItem::with_id(app, SETTINGS_ID, "Settings", true, None::<&str>)?;
     let pause_item = CheckMenuItem::with_id(app, PAUSE_ID, "Pause island", true, false, None::<&str>)?;
+    let update_item = updater::menu_item(app, UPDATE_ID)?;
     let quit_item = MenuItem::with_id(app, QUIT_ID, "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&settings_item, &pause_item, &quit_item])?;
+    let menu = Menu::with_items(app, &[&settings_item, &pause_item, &update_item, &quit_item])?;
     let icon = app.default_window_icon().cloned().ok_or(AppError::Missing("window icon"))?;
     TrayIconBuilder::new()
         .icon(icon)
@@ -32,6 +35,7 @@ fn handle_menu_event(app: &AppHandle, event: &MenuEvent, pause_item: &CheckMenuI
             let paused = pause_item.is_checked().unwrap_or(false);
             app.state::<HubHandle>().set_paused(paused);
         }
+        UPDATE_ID => updater::on_menu_click(app),
         QUIT_ID => app.exit(0),
         _ => {}
     }

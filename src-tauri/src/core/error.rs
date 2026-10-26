@@ -12,6 +12,8 @@ pub enum AppError {
     Windows(#[from] windows_core::Error),
     #[error(transparent)]
     Autostart(#[from] tauri_plugin_autostart::Error),
+    #[error(transparent)]
+    Updater(#[from] tauri_plugin_updater::Error),
     #[error("{0}")]
     Source(String),
     #[error("{0} not found")]

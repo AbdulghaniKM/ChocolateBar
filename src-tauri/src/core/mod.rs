@@ -8,3 +8,4 @@ pub mod hub;
 pub mod settings;
 pub mod source;
 pub mod tray;
+pub mod updater;
