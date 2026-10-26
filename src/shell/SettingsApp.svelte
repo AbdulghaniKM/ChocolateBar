@@ -7,6 +7,7 @@
   import { settingsState } from "../lib/settings.svelte";
   import { registry } from "../features/registry";
   import Panel from "./settings/Panel.svelte";
+  import CardOrder from "./settings/CardOrder.svelte";
   import PositionPicker from "./settings/PositionPicker.svelte";
   import ShortcutsEditor from "./settings/ShortcutsEditor.svelte";
   import { GENERAL_TAB, SHORTCUTS_TAB, TAB_META } from "./settings/tabs";
@@ -89,6 +90,10 @@
       {:else}
         <Panel title="Position" description="Pick a spot for the island, then nudge it into place.">
           <PositionPicker />
+        </Panel>
+
+        <Panel title="Cards" description="Choose what the island rests on and the order cards come in.">
+          <CardOrder />
         </Panel>
 
         <Panel title="Behavior">

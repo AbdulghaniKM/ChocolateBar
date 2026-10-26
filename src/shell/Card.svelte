@@ -13,8 +13,8 @@
   let { activity }: { activity: Activity } = $props();
 
   const Expanded = $derived(registry[activity.kind].Expanded);
-  const count = $derived(island.ordered.length);
-  const index = $derived(island.ordered.findIndex((entry) => entry.id === activity.id));
+  const count = $derived(island.ring.length);
+  const index = $derived(island.ring.findIndex((entry) => entry?.id === activity.id));
   const headerButton =
     "grid size-7 place-items-center rounded-full text-island-muted transition-colors hover:bg-island-hover hover:text-island-text";
 </script>

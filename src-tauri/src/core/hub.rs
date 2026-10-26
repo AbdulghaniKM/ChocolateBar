@@ -5,12 +5,14 @@ use std::time::Duration;
 use crossbeam_channel::{bounded, unbounded, Receiver, RecvTimeoutError, Sender};
 use serde::Serialize;
 use serde_json::Value;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 
 use super::activity::{now_ms, ActionRequest, Activity, Priority, SourceCommand};
+use super::cards::CardPrefs;
 use super::events::{
     stream_event, ACTIVITY_REMOVE, ACTIVITY_UPSERT, ISLAND_FOCUS, ISLAND_VISIBILITY,
 };
+use super::settings::{Settings, SettingsStore};
 use crate::window;
 
 const TICK: Duration = Duration::from_millis(100);
@@ -30,6 +32,7 @@ enum HubMessage {
     Command(SourceCommand),
     Cycle(i32),
     Focus(String),
+    SetCardPrefs(CardPrefs),
     SetExpanded(bool),
     SetFullscreen(bool),
     SetPaused(bool),
@@ -82,6 +85,10 @@ impl HubHandle {
         self.post(HubMessage::Cycle(direction));
     }
 
+    pub fn set_card_prefs(&self, prefs: CardPrefs) {
+        self.post(HubMessage::SetCardPrefs(prefs));
+    }
+
     pub fn focus(&self, id: String) {
         self.post(HubMessage::Focus(id));
     }
@@ -107,7 +114,10 @@ impl HubHandle {
 
 pub fn spawn(app: AppHandle) -> HubHandle {
     let (sender, receiver) = unbounded();
-    let hub = Hub::new(app);
+    let mut hub = Hub::new(app.clone());
+    let settings = app.state::<SettingsStore>();
+    hub.prefs = settings.current().general.card_prefs();
+    follow_card_settings(HubHandle { sender: sender.clone() }, settings.subscribe());
     let spawned = thread::Builder::new().name("hub".into()).spawn(move || hub.run(receiver));
     if let Err(error) = spawned {
         log::error!("hub failed to spawn: {error}");
@@ -115,8 +125,19 @@ pub fn spawn(app: AppHandle) -> HubHandle {
     HubHandle { sender }
 }
 
+fn follow_card_settings(hub: HubHandle, mut settings: tokio::sync::watch::Receiver<Settings>) {
+    tauri::async_runtime::spawn(async move {
+        while settings.changed().await.is_ok() {
+            let prefs = settings.borrow_and_update().general.card_prefs();
+            hub.set_card_prefs(prefs);
+        }
+    });
+}
+
 struct Hub {
     app: AppHandle,
+    prefs: CardPrefs,
+    clock_pinned: bool,
     activities: HashMap<String, Activity>,
     routes: HashMap<&'static str, SourceRoute>,
     focused: Option<String>,
@@ -130,6 +151,8 @@ impl Hub {
     fn new(app: AppHandle) -> Self {
         Self {
             app,
+            prefs: CardPrefs::default(),
+            clock_pinned: false,
             activities: HashMap::new(),
             routes: HashMap::new(),
             focused: None,
@@ -163,6 +186,10 @@ impl Hub {
             HubMessage::Command(command) => self.route_command(command),
             HubMessage::Cycle(direction) => self.cycle(direction),
             HubMessage::Focus(id) => self.focus(&id),
+            HubMessage::SetCardPrefs(prefs) => {
+                self.prefs = prefs;
+                self.refocus();
+            }
             HubMessage::SetExpanded(expanded) => self.set_expanded(expanded),
             HubMessage::SetFullscreen(fullscreen) => self.set_fullscreen(fullscreen),
             HubMessage::SetPaused(paused) => self.set_paused(paused),
@@ -180,8 +207,10 @@ impl Hub {
 
     fn upsert(&mut self, mut activity: Activity) {
         activity.updated_at_ms = now_ms();
-        if self.outranks_focus(&activity) {
+        let urgent = activity.priority >= Priority::High;
+        if self.outranks_focus(&activity) && (urgent || !self.clock_pinned) {
             self.pinned = false;
+            self.clock_pinned = false;
         }
         self.emit(ACTIVITY_UPSERT, &activity);
         self.activities.insert(activity.id.clone(), activity);
@@ -229,13 +258,15 @@ impl Hub {
         }
     }
 
-    fn rank(activity: &Activity) -> (Priority, bool, u64) {
-        (activity.priority, activity.alert, activity.updated_at_ms)
+    fn rank(prefs: &CardPrefs, activity: &Activity) -> (Priority, bool, usize, u64) {
+        (activity.priority, activity.alert, prefs.order_score(activity.kind), activity.updated_at_ms)
     }
 
     fn ranked(&self) -> Vec<&Activity> {
         let mut ordered: Vec<&Activity> = self.activities.values().collect();
-        ordered.sort_by(|a, b| Self::rank(b).cmp(&Self::rank(a)).then_with(|| a.id.cmp(&b.id)));
+        ordered.sort_by(|a, b| {
+            Self::rank(&self.prefs, b).cmp(&Self::rank(&self.prefs, a)).then_with(|| a.id.cmp(&b.id))
+        });
         ordered
     }
 
@@ -256,12 +287,40 @@ impl Hub {
     }
 
     fn choose_focus(&mut self) -> Option<String> {
+        if self.clock_pinned {
+            return None;
+        }
         let candidates = self.focusable_ids();
         let kept = self.focused.clone().filter(|id| self.pinned && candidates.contains(id));
         if kept.is_none() {
             self.pinned = false;
         }
-        kept.or_else(|| candidates.into_iter().next())
+        kept.or_else(|| self.idle_choice(&candidates))
+    }
+
+    /// Live activities always win; when only background cards remain, the user's default card is shown.
+    fn idle_choice(&self, candidates: &[String]) -> Option<String> {
+        let top = candidates.first()?;
+        let live = self.activities.get(top).is_some_and(|activity| activity.priority > Priority::Ambient);
+        if live {
+            return Some(top.clone());
+        }
+        if self.prefs.shows_clock_when_idle() {
+            return None;
+        }
+        candidates
+            .iter()
+            .find(|id| self.activities.get(*id).is_some_and(|activity| self.prefs.is_default(activity.kind)))
+            .or(Some(top))
+            .cloned()
+    }
+
+    /// Flipping goes through the clock (when it is the default card) and then the cards in the user's order.
+    fn cycle_ring(&self) -> Vec<Option<String>> {
+        let mut cards: Vec<&Activity> = self.focusable_ids().iter().filter_map(|id| self.activities.get(id)).collect();
+        cards.sort_by_key(|activity| std::cmp::Reverse(self.prefs.order_score(activity.kind)));
+        let clock = self.prefs.shows_clock_when_idle().then_some(None);
+        clock.into_iter().chain(cards.into_iter().map(|activity| Some(activity.id.clone()))).collect()
     }
 
     fn refocus(&mut self) {
@@ -278,18 +337,16 @@ impl Hub {
     }
 
     fn cycle(&mut self, direction: i32) {
-        let candidates = self.focusable_ids();
-        if candidates.len() < 2 {
+        let ring = self.cycle_ring();
+        if ring.len() < 2 {
             return;
         }
-        let current = self
-            .focused
-            .as_ref()
-            .and_then(|id| candidates.iter().position(|candidate| candidate == id))
-            .unwrap_or(0);
-        let next = (current as i32 + direction.signum()).rem_euclid(candidates.len() as i32);
-        self.pinned = true;
-        self.announce_focus(Some(candidates[next as usize].clone()));
+        let current = ring.iter().position(|entry| *entry == self.focused).unwrap_or(0);
+        let step = (current as i32 + direction.signum()).rem_euclid(ring.len() as i32) as usize;
+        let next = ring[step].clone();
+        self.clock_pinned = next.is_none();
+        self.pinned = next.is_some();
+        self.announce_focus(next);
     }
 
     /// Something the user just started (a timer, say) takes over the island even while it is expanded and pinned.
@@ -303,6 +360,7 @@ impl Hub {
 
     fn set_expanded(&mut self, expanded: bool) {
         self.pinned = expanded && self.focused.is_some();
+        self.clock_pinned = expanded && self.clock_pinned;
         self.refocus();
     }
 
@@ -348,7 +406,7 @@ mod tests {
         let normal_alert = activity("c", Priority::Normal, true, 0);
         let normal_new = activity("d", Priority::Normal, false, 5);
         let mut ranked = [&ambient, &normal_old, &normal_alert, &normal_new];
-        ranked.sort_by_key(|item| Reverse(Hub::rank(item)));
+        ranked.sort_by_key(|item| Reverse(Hub::rank(&CardPrefs::default(), item)));
         let order: Vec<&str> = ranked.iter().map(|item| item.id.as_str()).collect();
         assert_eq!(order, ["test:c", "test:d", "test:b", "test:a"]);
     }

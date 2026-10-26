@@ -1,4 +1,24 @@
 export type Priority = "ambient" | "normal" | "high" | "critical";
+export const CLOCK_CARD = "clock";
+export const DEFAULT_CARD_ORDER = [
+  "network",
+  "media",
+  "claude",
+  "timer",
+  "weather",
+  "battery",
+  "bluetooth",
+  "buds",
+  "download",
+  "game",
+  "sports",
+  "privacy",
+  "osd",
+  "keyboard",
+  "notification",
+  "ocr",
+  "shelf",
+] as const;
 
 export const ACTIVITY_KINDS = [
   "media",
@@ -100,7 +120,13 @@ export interface ShortcutGroup {
   apps: ShortcutApp[];
 }
 export interface Settings {
-  general: { hideInFullscreen: boolean; autostart: boolean; position: IslandPosition };
+  general: {
+    hideInFullscreen: boolean;
+    autostart: boolean;
+    position: IslandPosition;
+    defaultCard: string;
+    cardOrder: string[];
+  };
   hotkeys: { micMute: string; ocr: string };
   sources: Record<string, boolean>;
   media: { lyrics: boolean; visualizer: boolean };
@@ -121,6 +147,8 @@ export const defaultSettings: Settings = {
     hideInFullscreen: true,
     autostart: false,
     position: { vertical: "bottom", horizontal: "center", offsetX: 0, offsetY: 0 },
+    defaultCard: "clock",
+    cardOrder: [...DEFAULT_CARD_ORDER],
   },
   hotkeys: { micMute: "Ctrl+Alt+M", ocr: "Ctrl+Alt+O" },
   sources: {},

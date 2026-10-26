@@ -1,8 +1,10 @@
 import { SvelteMap } from "svelte/reactivity";
 import {
+  CLOCK_CARD,
   priorityRank,
   type Activity,
 } from "./contracts";
+import { settingsState } from "./settings.svelte";
 import {
   cycleActivity,
   focusActivity,
@@ -37,13 +39,26 @@ class Island {
   hubTab = $state<HubTab>("shortcuts");
   ordered = $derived(sortByRank([...this.activities.values()]));
   focused = $derived(this.focusedId ? (this.activities.get(this.focusedId) ?? null) : null);
+  /** The flip order shown in card headers: the clock (when it is the default card) and then the user's card order. */
+  ring = $derived.by(() => {
+    const { cardOrder, defaultCard } = settingsState.value.general;
+    const position = (activity: Activity) => {
+      const index = cardOrder.indexOf(activity.kind);
+      return index === -1 ? cardOrder.length : index;
+    };
+    const cards = [...this.activities.values()].sort((a, b) => position(a) - position(b));
+    return [...(defaultCard === CLOCK_CARD ? [null] : []), ...cards];
+  });
   private collapseTimer: ReturnType<typeof setTimeout> | undefined;
 
   async start(): Promise<() => void> {
     const unlisteners = await Promise.all([
       onActivityUpsert((activity) => this.activities.set(activity.id, activity)),
       onActivityRemove((id) => this.activities.delete(id)),
-      onIslandFocus((id) => (this.focusedId = id)),
+      onIslandFocus((id) => {
+        this.focusedId = id;
+        if (id === null && this.expanded && !this.showingHub) this.hubTab = "timer";
+      }),
       onIslandVisibility((visible) => (this.hidden = !visible)),
     ]);
     await this.loadSnapshot();

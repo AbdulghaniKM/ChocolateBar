@@ -6,6 +6,7 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_store::StoreExt;
 use tokio::sync::watch;
 
+use super::cards::CardPrefs;
 use super::error::AppResult;
 use super::events::SETTINGS_CHANGED;
 
@@ -18,11 +19,26 @@ pub struct GeneralSettings {
     pub hide_in_fullscreen: bool,
     pub autostart: bool,
     pub position: IslandPosition,
+    pub default_card: String,
+    pub card_order: Vec<String>,
 }
 
 impl Default for GeneralSettings {
     fn default() -> Self {
-        Self { hide_in_fullscreen: true, autostart: false, position: IslandPosition::default() }
+        let prefs = CardPrefs::default();
+        Self {
+            hide_in_fullscreen: true,
+            autostart: false,
+            position: IslandPosition::default(),
+            default_card: prefs.default_card,
+            card_order: prefs.order,
+        }
+    }
+}
+
+impl GeneralSettings {
+    pub fn card_prefs(&self) -> CardPrefs {
+        CardPrefs { default_card: self.default_card.clone(), order: self.card_order.clone() }
     }
 }
 

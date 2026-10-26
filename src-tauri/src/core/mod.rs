@@ -1,5 +1,6 @@
 pub mod activity;
 pub mod autostart;
+pub mod cards;
 pub mod clipboard;
 pub mod com;
 pub mod commands;
