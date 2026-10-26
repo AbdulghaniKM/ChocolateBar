@@ -7,6 +7,7 @@ use super::cards::{apply_change, DISMISS_ACTION};
 use super::hooks_install::{self, HookEndpoint, HooksStatus};
 use super::permission::{Decision, PermissionBroker};
 use super::server::RunningServer;
+use super::session_defaults::{self, SessionDefaults};
 use super::service::HookService;
 use super::token::token_from_settings_or_new;
 use super::tracker::SessionTracker;
@@ -71,6 +72,9 @@ impl ClaudeRuntime {
             "install_hooks" => self.install_hooks(),
             "uninstall_hooks" => self.uninstall_hooks(),
             "hooks_status" => self.hooks_status(),
+            "session_defaults" => self.session_defaults(),
+            "set_default_permission_mode" => self.set_default_permission_mode(&command.payload),
+            "set_default_model" => self.set_default_model(&command.payload),
             unknown => Err(AppError::Source(format!("unknown claude command {unknown}"))),
         };
         match outcome {
@@ -118,6 +122,21 @@ impl ClaudeRuntime {
         self.report(&hooks_install::status(&path))
     }
 
+    fn session_defaults(&self) -> AppResult<Value> {
+        let path = hooks_install::claude_settings_path()?;
+        defaults_report(&session_defaults::read_defaults(&path))
+    }
+
+    fn set_default_permission_mode(&self, payload: &Value) -> AppResult<Value> {
+        let path = hooks_install::claude_settings_path()?;
+        defaults_report(&session_defaults::set_default_permission_mode(&path, chosen_value(payload)?)?)
+    }
+
+    fn set_default_model(&self, payload: &Value) -> AppResult<Value> {
+        let path = hooks_install::claude_settings_path()?;
+        defaults_report(&session_defaults::set_default_model(&path, chosen_value(payload)?)?)
+    }
+
     fn report(&self, status: &HooksStatus) -> AppResult<Value> {
         Ok(json!({
             "hooks": serde_json::to_value(status)?,
@@ -136,4 +155,15 @@ impl ClaudeRuntime {
             server.stop();
         }
     }
+}
+
+fn chosen_value(payload: &Value) -> AppResult<&str> {
+    payload
+        .get("value")
+        .and_then(Value::as_str)
+        .ok_or_else(|| AppError::Source("command needs a text \"value\"".into()))
+}
+
+fn defaults_report(defaults: &SessionDefaults) -> AppResult<Value> {
+    Ok(serde_json::to_value(defaults)?)
 }

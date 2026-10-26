@@ -181,11 +181,11 @@ fn hooks_object(settings: &mut Value) -> AppResult<&mut Map<String, Value>> {
         .ok_or_else(|| unexpected_shape("hooks"))
 }
 
-fn unexpected_shape(what: &str) -> AppError {
+pub(super) fn unexpected_shape(what: &str) -> AppError {
     AppError::Source(format!("{what} in Claude settings has an unexpected shape; nothing was changed"))
 }
 
-fn read_settings(path: &Path) -> AppResult<Value> {
+pub(super) fn read_settings(path: &Path) -> AppResult<Value> {
     if !path.exists() {
         return Ok(json!({}));
     }
@@ -197,7 +197,7 @@ fn read_settings(path: &Path) -> AppResult<Value> {
         .map_err(|error| AppError::Source(format!("{} is not valid JSON ({error}); nothing was changed", path.display())))
 }
 
-fn write_with_backup(path: &Path, settings: &Value) -> AppResult<()> {
+pub(super) fn write_with_backup(path: &Path, settings: &Value) -> AppResult<()> {
     if path.exists() {
         fs::copy(path, backup_path(path)).map_err(|error| io_failure("back up", path, &error))?;
     } else if let Some(parent) = path.parent() {

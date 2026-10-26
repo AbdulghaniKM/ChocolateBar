@@ -10,15 +10,31 @@ use super::transcript::{TranscriptChange, TranscriptWatcher};
 const SESSION_RETENTION: Duration = Duration::from_secs(12 * 60 * 60);
 const NEW_TURN_EVENT: &str = "UserPromptSubmit";
 
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct SessionTraits {
+    pub permission_mode: Option<String>,
+    pub model: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum CardChange {
-    Show { session_id: String, project: Option<String>, state: SessionState },
+    Show { session_id: String, project: Option<String>, state: SessionState, traits: SessionTraits },
     Remove { session_id: String },
+}
+
+fn adopt(slot: &mut Option<String>, incoming: Option<&str>) -> bool {
+    let Some(incoming) = incoming.filter(|incoming| slot.as_deref() != Some(*incoming)) else {
+        return false;
+    };
+    *slot = Some(incoming.to_owned());
+    true
 }
 
 struct TrackedSession {
     state: SessionState,
     project: Option<String>,
+    permission_mode: Option<String>,
+    model: Option<String>,
     watcher: Option<TranscriptWatcher>,
     last_signal: Instant,
     dismissed: bool,
@@ -26,7 +42,15 @@ struct TrackedSession {
 
 impl TrackedSession {
     fn new(now: Instant) -> Self {
-        Self { state: SessionState::Started, project: None, watcher: None, last_signal: now, dismissed: false }
+        Self {
+            state: SessionState::Started,
+            project: None,
+            permission_mode: None,
+            model: None,
+            watcher: None,
+            last_signal: now,
+            dismissed: false,
+        }
     }
 
     fn absorb(&mut self, event: &str, payload: &HookPayload, state: SessionState, now: Instant) {
@@ -36,7 +60,15 @@ impl TrackedSession {
         if let Some(project) = payload.project_name() {
             self.project = Some(project);
         }
+        adopt(&mut self.permission_mode, payload.permission_mode());
+        adopt(&mut self.model, payload.model());
         self.follow_transcript(event, payload.transcript_path());
+        self.adopt_watched_model();
+    }
+
+    fn adopt_watched_model(&mut self) -> bool {
+        let watched = self.watcher.as_ref().and_then(TranscriptWatcher::model);
+        watched.is_some_and(|watched| adopt(&mut self.model, Some(watched)))
     }
 
     fn follow_transcript(&mut self, event: &str, path: Option<PathBuf>) {
@@ -55,6 +87,11 @@ impl TrackedSession {
             return false;
         }
         let change = self.watcher.as_mut().map_or(TranscriptChange::Unchanged, TranscriptWatcher::poll);
+        let model_changed = self.adopt_watched_model();
+        self.apply_transcript_change(change, now) || model_changed
+    }
+
+    fn apply_transcript_change(&mut self, change: TranscriptChange, now: Instant) -> bool {
         match change {
             TranscriptChange::Interrupted => return self.become_state(SessionState::Interrupted),
             TranscriptChange::Grew => self.last_signal = now,
@@ -74,6 +111,7 @@ impl TrackedSession {
             session_id: session_id.to_owned(),
             project: self.project.clone(),
             state: self.state.clone(),
+            traits: SessionTraits { permission_mode: self.permission_mode.clone(), model: self.model.clone() },
         }
     }
 }
@@ -112,6 +150,13 @@ impl SessionTracker {
             .collect();
         sessions.retain(|_, tracked| now.saturating_duration_since(tracked.last_signal) < SESSION_RETENTION);
         changes
+    }
+
+    pub fn change_permission_mode(&self, session_id: &str, mode: &str) -> Option<CardChange> {
+        let mut sessions = self.lock();
+        let tracked = sessions.get_mut(session_id)?;
+        adopt(&mut tracked.permission_mode, Some(mode));
+        (!tracked.dismissed).then(|| tracked.card_change(session_id))
     }
 
     pub fn dismiss(&self, session_id: &str) -> Option<CardChange> {
@@ -256,6 +301,57 @@ mod tests {
         assert!(tracker.poll(start + STALE_AFTER * 2).is_empty());
         let revived = tracker.record_event("PostToolUse", &body("s1", None), start + STALE_AFTER * 2);
         assert_eq!(state_of(revived), Some(SessionState::Thinking));
+    }
+
+    #[test]
+    fn mode_and_model_ride_along_and_persist_across_sparse_events() {
+        let (tracker, now) = (SessionTracker::default(), Instant::now());
+        let full = HookPayload::parse(br#"{"session_id":"s1","permission_mode":"plan","model":"claude-opus-5-5"}"#);
+        tracker.record_event("SessionStart", &full, now);
+        let sparse = HookPayload::parse(br#"{"session_id":"s1"}"#);
+        match tracker.record_event("PostToolUse", &sparse, now) {
+            Some(CardChange::Show { traits, .. }) => {
+                assert_eq!(traits.permission_mode.as_deref(), Some("plan"));
+                assert_eq!(traits.model.as_deref(), Some("claude-opus-5-5"));
+            }
+            other => panic!("unexpected change {other:?}"),
+        }
+    }
+
+    #[test]
+    fn switching_mode_updates_the_card_and_unknown_sessions_are_ignored() {
+        let (tracker, now) = (SessionTracker::default(), Instant::now());
+        tracker.record_event("UserPromptSubmit", &body("s1", None), now);
+        match tracker.change_permission_mode("s1", "acceptEdits") {
+            Some(CardChange::Show { traits, state, .. }) => {
+                assert_eq!(traits.permission_mode.as_deref(), Some("acceptEdits"));
+                assert_eq!(state, SessionState::Thinking);
+            }
+            other => panic!("unexpected change {other:?}"),
+        }
+        assert_eq!(tracker.change_permission_mode("ghost", "auto"), None);
+    }
+
+    #[test]
+    fn switching_mode_of_a_dismissed_session_stays_hidden() {
+        let (tracker, now) = (SessionTracker::default(), Instant::now());
+        tracker.record_event("UserPromptSubmit", &body("s1", None), now);
+        tracker.dismiss("s1");
+        assert_eq!(tracker.change_permission_mode("s1", "auto"), None);
+    }
+
+    #[test]
+    fn model_from_the_transcript_reaches_the_card_while_working() {
+        let path = temp_transcript("model");
+        let (tracker, now) = (SessionTracker::default(), Instant::now());
+        tracker.record_event("UserPromptSubmit", &body("s1", Some(&path)), now);
+        append_line(&path, r#"{"type":"assistant","message":{"model":"claude-opus-5-5","content":[]}}"#);
+        match tracker.poll(now).into_iter().next() {
+            Some(CardChange::Show { traits, .. }) => assert_eq!(traits.model.as_deref(), Some("claude-opus-5-5")),
+            other => panic!("unexpected change {other:?}"),
+        }
+        assert!(tracker.poll(now).is_empty());
+        cleanup(&path);
     }
 
     #[test]

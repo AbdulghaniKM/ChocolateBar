@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 
 use super::cards::{apply_change, permission_activity};
 use super::payload::HookPayload;
-use super::permission::{defer_to_terminal_reply, PermissionBroker};
+use super::permission::{defer_to_terminal_reply, Decision, PermissionBroker};
 use super::tracker::SessionTracker;
 use crate::core::activity::Activity;
 use crate::core::source::SourceContext;
@@ -45,8 +45,20 @@ impl HookService {
         let card = permission_activity(&self.ctx, &parked.key, payload);
         let _visible = VisibleCard::show(&self.ctx, card, &parked.key);
         match parked.wait_for_decision(PERMISSION_TIMEOUT).await {
-            Some(decision) => decision.reply(),
+            Some(decision) => {
+                self.reflect_switched_mode(payload.session_id(), decision);
+                decision.reply()
+            }
             None => defer_to_terminal_reply(),
+        }
+    }
+
+    fn reflect_switched_mode(&self, session_id: &str, decision: Decision) {
+        let Some(mode) = decision.switched_mode() else {
+            return;
+        };
+        if let Some(change) = self.sessions.change_permission_mode(session_id, mode.as_str()) {
+            apply_change(&self.ctx, &change);
         }
     }
 }

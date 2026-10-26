@@ -2,9 +2,11 @@
   import { onMount } from "svelte";
   import { settingsState } from "../../lib/settings.svelte";
   import { sourceCommand } from "../../lib/ipc";
-  import type { HooksReport } from "./claudeView";
+  import { modelLabel, permissionModeLabel, type HooksReport, type SessionDefaults } from "./claudeView";
 
   let report = $state<HooksReport>();
+  let defaults = $state<SessionDefaults>();
+  let defaultsBusy = $state(false);
   let busy = $state(false);
   let failure = $state("");
 
@@ -22,7 +24,30 @@
     }
   }
 
-  onMount(() => void run("hooks_status"));
+  async function changeDefault(command: "set_default_permission_mode" | "set_default_model", value: string) {
+    defaultsBusy = true;
+    failure = "";
+    try {
+      defaults = await sourceCommand<SessionDefaults>("claude", command, { value });
+    } catch (error) {
+      failure = String(error);
+    } finally {
+      defaultsBusy = false;
+    }
+  }
+
+  async function loadDefaults() {
+    try {
+      defaults = await sourceCommand<SessionDefaults>("claude", "session_defaults");
+    } catch (error) {
+      failure = String(error);
+    }
+  }
+
+  onMount(() => {
+    void run("hooks_status");
+    void loadDefaults();
+  });
 </script>
 
 <section class="flex flex-col gap-5">
@@ -76,6 +101,48 @@
       <p class="text-xs text-danger">{failure}</p>
     {/if}
   </div>
+
+  {#if defaults}
+    <div class="flex flex-col gap-3 rounded-2xl border border-island-border bg-island-raised p-4">
+      <h3 class="text-sm font-medium">Defaults for new sessions</h3>
+      <label class="flex items-center gap-3 text-sm">
+        <span class="w-[8rem]">Permission mode</span>
+        <select
+          class="rounded-lg bg-island px-3 py-1"
+          disabled={defaultsBusy}
+          value={defaults.permissionMode ?? ""}
+          onchange={(event) => changeDefault("set_default_permission_mode", event.currentTarget.value)}
+        >
+          {#if !defaults.permissionMode}
+            <option value="" disabled>Not set</option>
+          {/if}
+          {#each defaults.permissionModes as mode (mode)}
+            <option value={mode}>{permissionModeLabel(mode)}</option>
+          {/each}
+        </select>
+      </label>
+      <label class="flex items-center gap-3 text-sm">
+        <span class="w-[8rem]">Model</span>
+        <select
+          class="rounded-lg bg-island px-3 py-1"
+          disabled={defaultsBusy}
+          value={defaults.model ?? "default"}
+          onchange={(event) => changeDefault("set_default_model", event.currentTarget.value)}
+        >
+          {#if defaults.model && !defaults.models.includes(defaults.model)}
+            <option value={defaults.model} disabled>{modelLabel(defaults.model)}</option>
+          {/if}
+          {#each defaults.models as model (model)}
+            <option value={model}>{model}</option>
+          {/each}
+        </select>
+      </label>
+      <p class="text-xs text-island-muted">
+        Applies to new sessions only. Writes just permissions.defaultMode and model in {defaults.settingsPath} when you
+        pick a value; a backup is saved first. Running sessions keep their mode and model.
+      </p>
+    </div>
+  {/if}
 
   <label class="flex items-center gap-3 text-sm">
     <span class="w-[8rem]">Port</span>

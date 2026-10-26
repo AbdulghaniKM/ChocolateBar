@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Activity } from "../../lib/contracts";
+  import SessionChips from "./SessionChips.svelte";
 
   let { activity }: { activity: Activity } = $props();
 </script>
@@ -16,4 +17,5 @@
   {#if activity.compact.subtitle}
     <span class="min-w-0 flex-1 truncate text-island-muted">{activity.compact.subtitle}</span>
   {/if}
+  <SessionChips {activity} />
 </div>

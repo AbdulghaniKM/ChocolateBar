@@ -6,9 +6,43 @@ use std::time::Duration;
 use serde_json::{json, Value};
 use tokio::sync::oneshot;
 
+const SESSION_DESTINATION: &str = "session";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SwitchableMode {
+    AcceptEdits,
+    Auto,
+}
+
+impl SwitchableMode {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::AcceptEdits => "acceptEdits",
+            Self::Auto => "auto",
+        }
+    }
+
+    pub fn allow_action_id(self) -> &'static str {
+        match self {
+            Self::AcceptEdits => "allow_accept_edits",
+            Self::Auto => "allow_auto",
+        }
+    }
+
+    pub fn allow_label(self) -> &'static str {
+        match self {
+            Self::AcceptEdits => "Allow + accept edits",
+            Self::Auto => "Allow + auto mode",
+        }
+    }
+}
+
+pub const SWITCHABLE_MODES: [SwitchableMode; 2] = [SwitchableMode::AcceptEdits, SwitchableMode::Auto];
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Decision {
     Allow,
+    AllowAndSwitchTo(SwitchableMode),
     Deny,
 }
 
@@ -17,13 +51,27 @@ impl Decision {
         match action {
             "allow" => Some(Self::Allow),
             "deny" => Some(Self::Deny),
-            _ => None,
+            other => SWITCHABLE_MODES
+                .into_iter()
+                .find(|mode| mode.allow_action_id() == other)
+                .map(Self::AllowAndSwitchTo),
+        }
+    }
+
+    pub fn switched_mode(self) -> Option<SwitchableMode> {
+        match self {
+            Self::AllowAndSwitchTo(mode) => Some(mode),
+            Self::Allow | Self::Deny => None,
         }
     }
 
     pub fn reply(self) -> Value {
         let decision = match self {
             Self::Allow => json!({ "behavior": "allow" }),
+            Self::AllowAndSwitchTo(mode) => json!({
+                "behavior": "allow",
+                "updatedPermissions": [{ "type": "setMode", "mode": mode.as_str(), "destination": SESSION_DESTINATION }],
+            }),
             Self::Deny => json!({ "behavior": "deny", "message": "Denied from ChocolateBar" }),
         };
         json!({ "hookSpecificOutput": { "hookEventName": "PermissionRequest", "decision": decision } })
@@ -98,6 +146,40 @@ mod tests {
         let reply = Decision::Deny.reply();
         assert_eq!(reply["hookSpecificOutput"]["decision"]["behavior"], "deny");
         assert!(reply["hookSpecificOutput"]["decision"]["message"].is_string());
+    }
+
+    #[test]
+    fn accept_edits_reply_switches_the_session_mode() {
+        let reply = Decision::AllowAndSwitchTo(SwitchableMode::AcceptEdits).reply();
+        let decision = &reply["hookSpecificOutput"]["decision"];
+        assert_eq!(decision["behavior"], "allow");
+        assert_eq!(
+            decision["updatedPermissions"],
+            json!([{ "type": "setMode", "mode": "acceptEdits", "destination": "session" }])
+        );
+    }
+
+    #[test]
+    fn auto_reply_switches_the_session_mode() {
+        let reply = Decision::AllowAndSwitchTo(SwitchableMode::Auto).reply();
+        assert_eq!(reply["hookSpecificOutput"]["decision"]["updatedPermissions"][0]["mode"], "auto");
+    }
+
+    #[test]
+    fn plain_allow_and_deny_carry_no_permission_update() {
+        assert!(Decision::Allow.reply()["hookSpecificOutput"]["decision"].get("updatedPermissions").is_none());
+        assert!(Decision::Deny.reply()["hookSpecificOutput"]["decision"].get("updatedPermissions").is_none());
+    }
+
+    #[test]
+    fn every_action_id_maps_to_its_decision() {
+        assert_eq!(Decision::from_action("allow"), Some(Decision::Allow));
+        assert_eq!(Decision::from_action("deny"), Some(Decision::Deny));
+        for mode in SWITCHABLE_MODES {
+            let decision = Decision::from_action(mode.allow_action_id());
+            assert_eq!(decision.and_then(Decision::switched_mode), Some(mode));
+        }
+        assert_eq!(Decision::from_action("dismiss"), None);
     }
 
     #[test]

@@ -39,6 +39,14 @@ impl HookPayload {
         self.text("transcript_path").map(PathBuf::from)
     }
 
+    pub fn permission_mode(&self) -> Option<&str> {
+        self.text("permission_mode")
+    }
+
+    pub fn model(&self) -> Option<&str> {
+        self.text("model")
+    }
+
     pub fn project_name(&self) -> Option<String> {
         let working_directory = self.text("cwd")?;
         let name = Path::new(working_directory).file_name()?;
@@ -120,6 +128,14 @@ mod tests {
         let payload = HookPayload::parse(br#"{"transcript_path":"C:\\logs\\s.jsonl"}"#);
         assert_eq!(payload.transcript_path(), Some(PathBuf::from(r"C:\logs\s.jsonl")));
         assert_eq!(HookPayload::parse(b"{}").transcript_path(), None);
+    }
+
+    #[test]
+    fn reads_permission_mode_and_model_when_present() {
+        let payload = HookPayload::parse(br#"{"permission_mode":"acceptEdits","model":"claude-opus-5-5"}"#);
+        assert_eq!(payload.permission_mode(), Some("acceptEdits"));
+        assert_eq!(payload.model(), Some("claude-opus-5-5"));
+        assert_eq!(HookPayload::parse(b"{}").permission_mode(), None);
     }
 
     #[test]

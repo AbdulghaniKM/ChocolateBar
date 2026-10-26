@@ -1,8 +1,9 @@
 use serde_json::json;
 
 use super::payload::{preview_tool_input, summarize_tool_input, HookPayload};
+use super::permission::{SwitchableMode, SWITCHABLE_MODES};
 use super::sessions::SessionState;
-use super::tracker::CardChange;
+use super::tracker::{CardChange, SessionTraits};
 use crate::core::activity::{ActionSpec, ActionStyle, Activity, ActivityKind, CompactView, Priority};
 use crate::core::source::SourceContext;
 
@@ -21,8 +22,8 @@ struct StatusLine {
 
 pub fn apply_change(ctx: &SourceContext, change: &CardChange) {
     match change {
-        CardChange::Show { session_id, project, state } => {
-            ctx.upsert(session_activity(ctx, session_id, project.as_deref(), state));
+        CardChange::Show { session_id, project, state, traits } => {
+            ctx.upsert(session_activity(ctx, session_id, project.as_deref(), state, traits));
         }
         CardChange::Remove { session_id } => ctx.remove(session_id),
     }
@@ -33,6 +34,7 @@ fn session_activity(
     session_id: &str,
     project: Option<&str>,
     state: &SessionState,
+    traits: &SessionTraits,
 ) -> Activity {
     let status = status_line(state);
     let title = project.unwrap_or("Claude Code");
@@ -45,6 +47,8 @@ fn session_activity(
         "project": project,
         "statusLine": status.text,
         "tool": tool_of(state),
+        "permissionMode": traits.permission_mode,
+        "model": traits.model,
     });
     let activity = ctx
         .activity(session_id, ActivityKind::Claude, compact)
@@ -65,13 +69,27 @@ pub fn permission_activity(ctx: &SourceContext, request_key: &str, payload: &Hoo
         "toolName": tool,
         "inputPreview": preview_tool_input(payload.tool_input()),
         "project": payload.project_name(),
+        "permissionMode": payload.permission_mode(),
     });
     ctx.activity(request_key, ActivityKind::Claude, compact)
         .priority(Priority::Critical)
         .alert(true)
         .expanded(expanded)
         .action(ActionSpec::button("allow", "Allow").icon("✓").style(ActionStyle::Primary))
+        .actions(mode_switch_actions(payload.permission_mode()))
         .action(ActionSpec::button("deny", "Deny").icon("✕").style(ActionStyle::Danger))
+}
+
+fn mode_switch_actions(current_mode: Option<&str>) -> Vec<ActionSpec> {
+    SWITCHABLE_MODES
+        .into_iter()
+        .filter(|mode| current_mode != Some(mode.as_str()))
+        .map(switch_action)
+        .collect()
+}
+
+fn switch_action(mode: SwitchableMode) -> ActionSpec {
+    ActionSpec::button(mode.allow_action_id(), mode.allow_label()).icon("✓")
 }
 
 fn status_line(state: &SessionState) -> StatusLine {
@@ -142,6 +160,23 @@ mod tests {
         for state in finished {
             assert!(ttl_for(&state) < 60_000);
         }
+    }
+
+    fn action_ids(actions: &[ActionSpec]) -> Vec<&str> {
+        actions.iter().map(|action| action.id.as_str()).collect()
+    }
+
+    #[test]
+    fn permission_card_offers_every_mode_switch_when_the_mode_is_unknown_or_manual() {
+        for mode in [None, Some("default")] {
+            assert_eq!(action_ids(&mode_switch_actions(mode)), ["allow_accept_edits", "allow_auto"]);
+        }
+    }
+
+    #[test]
+    fn permission_card_hides_the_switch_to_the_mode_already_active() {
+        assert_eq!(action_ids(&mode_switch_actions(Some("acceptEdits"))), ["allow_auto"]);
+        assert_eq!(action_ids(&mode_switch_actions(Some("auto"))), ["allow_accept_edits"]);
     }
 
     #[test]

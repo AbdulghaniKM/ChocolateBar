@@ -17,12 +17,18 @@ pub enum TranscriptChange {
 pub struct TranscriptWatcher {
     path: PathBuf,
     offset: u64,
+    model: Option<String>,
 }
 
 impl TranscriptWatcher {
     pub fn starting_at_end(path: PathBuf) -> Self {
         let offset = file_length(&path).unwrap_or(0);
-        Self { path, offset }
+        let model = recent_model(&path, offset);
+        Self { path, offset, model }
+    }
+
+    pub fn model(&self) -> Option<&str> {
+        self.model.as_deref()
     }
 
     pub fn path(&self) -> &Path {
@@ -45,6 +51,9 @@ impl TranscriptWatcher {
             return TranscriptChange::Unchanged;
         }
         let tail = self.take_complete_lines(length);
+        if let Some(model) = newest_assistant_model(&tail) {
+            self.model = Some(model);
+        }
         if newest_user_entry_is_interrupt(&tail) {
             TranscriptChange::Interrupted
         } else {
@@ -72,6 +81,28 @@ pub fn newest_user_entry_is_interrupt(lines: &str) -> bool {
         .filter_map(|line| serde_json::from_str::<Value>(line).ok())
         .find(|entry| entry.get("type").and_then(Value::as_str) == Some("user"))
         .is_some_and(|entry| user_message_text(&entry).contains(INTERRUPT_MARKER))
+}
+
+pub fn newest_assistant_model(lines: &str) -> Option<String> {
+    lines
+        .lines()
+        .rev()
+        .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+        .filter(|entry| entry.get("type").and_then(Value::as_str) == Some("assistant"))
+        .find_map(|entry| real_model_name(&entry))
+}
+
+fn real_model_name(entry: &Value) -> Option<String> {
+    let name = entry.pointer("/message/model")?.as_str()?;
+    (!name.is_empty() && !name.starts_with('<')).then(|| name.to_owned())
+}
+
+fn recent_model(path: &Path, length: u64) -> Option<String> {
+    let start = length.saturating_sub(MAX_TAIL_BYTES);
+    let bytes = read_range(path, start, length)?;
+    let text = String::from_utf8_lossy(&bytes);
+    let complete = if start > 0 { text.split_once('\n').map_or("", |(_, rest)| rest) } else { &text };
+    newest_assistant_model(complete)
 }
 
 fn user_message_text(entry: &Value) -> String {
@@ -184,6 +215,29 @@ mod tests {
         append(&path, &format!("{INTERRUPT_LINE}\n"));
         watcher.skip_to_end();
         assert_eq!(watcher.poll(), TranscriptChange::Unchanged);
+        cleanup(&path);
+    }
+
+    #[test]
+    fn newest_assistant_model_is_picked_and_synthetic_ones_skipped() {
+        let older = r#"{"type":"assistant","message":{"model":"claude-sonnet-5","role":"assistant","content":[]}}"#;
+        let newer = r#"{"type":"assistant","message":{"model":"claude-opus-5-5","role":"assistant","content":[]}}"#;
+        let synthetic = r#"{"type":"assistant","message":{"model":"<synthetic>","role":"assistant","content":[]}}"#;
+        let lines = format!("{older}\n{newer}\n{synthetic}\n{PROMPT_LINE}\n");
+        assert_eq!(newest_assistant_model(&lines).as_deref(), Some("claude-opus-5-5"));
+        assert_eq!(newest_assistant_model(PROMPT_LINE), None);
+    }
+
+    #[test]
+    fn watcher_knows_the_model_from_history_and_follows_changes() {
+        let path = temp_transcript("model");
+        let assistant = |model: &str| format!(r#"{{"type":"assistant","message":{{"model":"{model}","content":[]}}}}"#);
+        append(&path, &format!("{}\n", assistant("claude-sonnet-5")));
+        let mut watcher = TranscriptWatcher::starting_at_end(path.clone());
+        assert_eq!(watcher.model(), Some("claude-sonnet-5"));
+        append(&path, &format!("{}\n", assistant("claude-opus-5-5")));
+        watcher.poll();
+        assert_eq!(watcher.model(), Some("claude-opus-5-5"));
         cleanup(&path);
     }
 
