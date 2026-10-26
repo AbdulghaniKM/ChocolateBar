@@ -17,12 +17,40 @@ const SETTINGS_KEY: &str = "settings";
 pub struct GeneralSettings {
     pub hide_in_fullscreen: bool,
     pub autostart: bool,
+    pub position: IslandPosition,
 }
 
 impl Default for GeneralSettings {
     fn default() -> Self {
-        Self { hide_in_fullscreen: true, autostart: false }
+        Self { hide_in_fullscreen: true, autostart: false, position: IslandPosition::default() }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum VerticalAnchor {
+    Top,
+    Middle,
+    #[default]
+    Bottom,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum HorizontalAnchor {
+    Left,
+    #[default]
+    Center,
+    Right,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct IslandPosition {
+    pub vertical: VerticalAnchor,
+    pub horizontal: HorizontalAnchor,
+    pub offset_x: i32,
+    pub offset_y: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

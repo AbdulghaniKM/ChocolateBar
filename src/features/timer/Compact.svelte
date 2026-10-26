@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import Ring from "./Ring.svelte";
   import { useNow } from "./ticker.svelte";
@@ -14,7 +15,7 @@
 
 {#if isAlert}
   <div class="flex h-full min-w-0 items-center gap-2 px-3 text-sm">
-    <span class="animate-pulse text-lg">{activity.compact.icon}</span>
+    <span class="animate-pulse text-accent"><Glyph glyph={activity.compact.icon} class="size-[1.125rem]" /></span>
     <span class="truncate font-medium">{activity.compact.title}</span>
     {#if activity.compact.subtitle}
       <span class="truncate text-xs text-island-muted">{activity.compact.subtitle}</span>
@@ -24,7 +25,7 @@
   <div class="flex h-full w-full min-w-0 items-center gap-3 px-3 text-sm">
     <div class="size-7 shrink-0">
       <Ring fraction={ringFraction(view, elapsedMs)} accent={view.accent} strokeWidth={10}>
-        <span class="text-[0.75rem] leading-none">{activity.compact.icon}</span>
+        <Glyph glyph={activity.compact.icon} class="size-3" />
       </Ring>
     </div>
     <span

@@ -1,9 +1,11 @@
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::window::Color;
+use tauri::{AppHandle, Manager, Theme, WebviewUrl, WebviewWindowBuilder};
 
 use crate::core::error::AppResult;
 
 const SETTINGS_LABEL: &str = "settings";
 const SETTINGS_URL: &str = "index.html#settings";
+const BACKGROUND: Color = Color(0x14, 0x0e, 0x0b, 0xff);
 
 pub fn open(app: &AppHandle) -> AppResult<()> {
     if let Some(existing) = app.get_webview_window(SETTINGS_LABEL) {
@@ -13,8 +15,10 @@ pub fn open(app: &AppHandle) -> AppResult<()> {
     }
     WebviewWindowBuilder::new(app, SETTINGS_LABEL, WebviewUrl::App(SETTINGS_URL.into()))
         .title("ChocolateBar Settings")
-        .inner_size(900.0, 640.0)
-        .min_inner_size(640.0, 480.0)
+        .inner_size(960.0, 680.0)
+        .min_inner_size(720.0, 520.0)
+        .theme(Some(Theme::Dark))
+        .background_color(BACKGROUND)
         .decorations(true)
         .resizable(true)
         .center()

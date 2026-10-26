@@ -1,5 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" rx="224" fill="#0b0b0d"/>
-  <rect x="192" y="352" width="640" height="320" rx="160" fill="#7b3f1d"/>
-  <rect x="256" y="416" width="512" height="192" rx="96" fill="#f59e0b"/>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1b14"/>
+      <stop offset="1" stop-color="#120c09"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f5233"/>
+      <stop offset="1" stop-color="#5a2f1b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f4bd81"/>
+      <stop offset="0.55" stop-color="#eaa660"/>
+      <stop offset="1" stop-color="#eaa660" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#tile)"/>
+  <rect x="8" y="8" width="1008" height="1008" rx="226" fill="none" stroke="#ffe9d6" stroke-opacity="0.08" stroke-width="12"/>
+  <rect x="152" y="372" width="720" height="280" rx="140" fill="url(#bar)"/>
+  <rect x="152" y="372" width="720" height="280" rx="140" fill="none" stroke="#ffd8b4" stroke-opacity="0.22" stroke-width="10"/>
+  <path d="M432 392v240M592 392v240M752 412v200" stroke="#3e1f11" stroke-opacity="0.55" stroke-width="18" stroke-linecap="round"/>
+  <path d="M440 392v240M600 392v240M760 412v200" stroke="#c07a4f" stroke-opacity="0.35" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="292" cy="512" r="110" fill="url(#glow)" opacity="0.55"/>
+  <circle cx="292" cy="512" r="58" fill="#eaa660"/>
+  <circle cx="276" cy="494" r="18" fill="#fff3e4" opacity="0.7"/>
 </svg>

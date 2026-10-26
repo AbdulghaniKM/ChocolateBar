@@ -13,7 +13,7 @@ import {
   setExpanded,
 } from "./ipc";
 
-const COLLAPSE_DELAY_MS = 3000;
+const COLLAPSE_DELAY_MS = 1500;
 
 export function sortByRank(activities: Activity[]): Activity[] {
   return [...activities].sort(

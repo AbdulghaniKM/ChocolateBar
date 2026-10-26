@@ -4,7 +4,7 @@ use super::artwork;
 use super::lrc::LyricLine;
 use super::lyrics::{LyricsQuery, LyricsService};
 use super::playback_flag;
-use super::session::{Playback, Reading, Track};
+use super::session::{Playback, Reading, RepeatMode, SourceSummary, Track};
 use super::view::{build_activity, TrackFrame, ACTIVITY_KEY};
 use crate::core::settings::Settings;
 use crate::core::source::SourceContext;
@@ -27,11 +27,15 @@ struct Published {
     duration_ms: u64,
     position_ms: u64,
     rate: f64,
+    shuffle: Option<bool>,
+    repeat: Option<RepeatMode>,
+    sources: Vec<SourceSummary>,
     at: Instant,
 }
 
 impl Published {
-    fn of(playback: &Playback) -> Self {
+    fn of(reading: &Reading) -> Self {
+        let playback = &reading.playback;
         Self {
             playing: playback.playing,
             can_go_previous: playback.can_go_previous,
@@ -39,6 +43,9 @@ impl Published {
             duration_ms: playback.duration_ms,
             position_ms: playback.position_ms,
             rate: playback.rate,
+            shuffle: playback.shuffle,
+            repeat: playback.repeat,
+            sources: reading.sources.clone(),
             at: Instant::now(),
         }
     }
@@ -49,8 +56,12 @@ impl Published {
         self.position_ms as f64 + advanced
     }
 
-    fn differs_from(&self, playback: &Playback) -> bool {
+    fn differs_from(&self, reading: &Reading) -> bool {
+        let playback = &reading.playback;
         self.playing != playback.playing
+            || self.shuffle != playback.shuffle
+            || self.repeat != playback.repeat
+            || self.sources != reading.sources
             || self.can_go_previous != playback.can_go_previous
             || self.can_go_next != playback.can_go_next
             || self.duration_ms != playback.duration_ms
@@ -90,7 +101,7 @@ impl Publisher {
         playback_flag::set_playing(reading.playback.playing);
         if self.is_lingering_paused(&reading.playback) {
             self.withdraw_published(ctx);
-        } else if self.needs_publish(&reading.playback) {
+        } else if self.needs_publish(&reading) {
             self.publish(ctx, &reading);
         }
     }
@@ -109,7 +120,7 @@ impl Publisher {
     }
 
     fn follow_track(&mut self, reading: &Reading) {
-        let key = reading.track.key();
+        let key = format!("{}\u{1f}{}", reading.source.id, reading.track.key());
         let unchanged = self.track.as_ref().is_some_and(|state| state.key == key);
         if unchanged {
             self.retry_missing_artwork(reading);
@@ -169,9 +180,9 @@ impl Publisher {
         since.elapsed() > PAUSED_LINGER
     }
 
-    fn needs_publish(&self, playback: &Playback) -> bool {
+    fn needs_publish(&self, reading: &Reading) -> bool {
         match &self.published {
-            Some(published) => self.dirty || published.differs_from(playback),
+            Some(published) => self.dirty || published.differs_from(reading),
             None => true,
         }
     }
@@ -185,9 +196,11 @@ impl Publisher {
             art: state.art.as_deref(),
             lyrics: &state.lyrics,
             playback: &reading.playback,
+            source: &reading.source,
+            sources: &reading.sources,
         };
         ctx.upsert(build_activity(ctx, &frame));
-        self.published = Some(Published::of(&reading.playback));
+        self.published = Some(Published::of(reading));
         self.dirty = false;
     }
 }

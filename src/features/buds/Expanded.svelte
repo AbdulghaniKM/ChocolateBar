@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import { activityAction } from "../../lib/ipc";
   import BudGauge from "./BudGauge.svelte";
@@ -27,9 +28,9 @@
   <div class="flex h-full flex-col justify-center gap-5 px-7">
     <div class="flex items-center gap-3">
       <span
-        class="flex size-[2.5rem] items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[1.25rem] backdrop-blur"
+        class="flex size-[2.5rem] items-center justify-center tile rounded-xl text-accent"
       >
-        {activity.compact.icon}
+        <Glyph glyph={activity.compact.icon} class="size-5" />
       </span>
       <div class="flex min-w-0 flex-col leading-tight">
         <span class="truncate text-[1rem] font-medium text-island-text">{status.name}</span>
@@ -51,7 +52,7 @@
         </p>
       {/if}
     {:else}
-      <div class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur">
+      <div class="flex flex-col items-center gap-3 tile rounded-2xl p-4 text-center">
         {#if status.fallbackPercent !== null}
           <span class="text-[2rem] leading-none font-semibold tabular-nums text-island-text">{status.fallbackPercent}%</span>
         {/if}
@@ -61,7 +62,7 @@
   </div>
 {:else}
   <div class="flex h-full flex-col items-center justify-center gap-3 px-6">
-    <span class="text-[3rem]">{activity.compact.icon}</span>
+    <Glyph glyph={activity.compact.icon} class="size-12 text-accent" strokeWidth={1.75} />
     <span class="text-[1.125rem] font-medium text-island-text">{activity.compact.title}</span>
     <span class="text-[0.75rem] text-island-muted">{activity.compact.subtitle}</span>
   </div>

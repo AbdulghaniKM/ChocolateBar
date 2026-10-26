@@ -30,6 +30,7 @@ pub fn run() {
             commands::source_command,
             commands::cycle_activity,
             commands::set_hit_regions,
+            commands::set_island_size,
             commands::set_expanded,
             commands::get_settings,
             commands::update_settings,

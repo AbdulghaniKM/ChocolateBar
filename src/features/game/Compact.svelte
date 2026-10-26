@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import { PLAYING_ACTIVITY_ID } from "./types";
 
@@ -8,8 +9,8 @@
 </script>
 
 <div class="flex h-full w-full min-w-0 items-center gap-2.5 px-3 text-sm">
-  <span class="relative flex size-6 shrink-0 items-center justify-center text-lg leading-none">
-    {activity.compact.icon}
+  <span class="relative flex size-6 shrink-0 items-center justify-center text-island-text">
+    <Glyph glyph={activity.compact.icon} class="size-[1.125rem]" />
     {#if isPlaying}
       <span class="absolute -right-0.5 -bottom-0.5 size-2 animate-pulse rounded-full bg-success"></span>
     {/if}

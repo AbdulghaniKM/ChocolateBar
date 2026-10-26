@@ -29,6 +29,9 @@ export const cycleActivity = (direction: 1 | -1) =>
 export const setHitRegions = (rects: HitRect[]) =>
   invoke<void>("set_hit_regions", { rects });
 
+export const setIslandSize = (width: number, height: number) =>
+  invoke<void>("set_island_size", { width, height });
+
 export const setExpanded = (expanded: boolean) =>
   invoke<void>("set_expanded", { expanded });
 

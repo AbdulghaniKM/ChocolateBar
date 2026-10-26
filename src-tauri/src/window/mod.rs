@@ -24,6 +24,7 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
         .ok_or(AppError::Missing("main window"))?;
     let hwnd = native::capture(&window)?;
     show_as_overlay(&window)?;
+    placement::set_position(hwnd, app.state::<SettingsStore>().current().general.position);
     placement::place(hwnd);
     subclass::install(hwnd)?;
     replace_on_scale_change(&window);
@@ -78,7 +79,17 @@ fn start_watchers(app: &AppHandle, window: WebviewWindow) {
     let settings = app.state::<SettingsStore>().subscribe();
     let hub = app.state::<HubHandle>().inner().clone();
     let regions = app.state::<HitRegions>().inner().clone();
+    follow_position_setting(app.state::<SettingsStore>().subscribe());
     click_through::spawn(window, regions, shutdown.clone());
     zorder::spawn();
     fullscreen::spawn(hub, settings, shutdown);
+}
+
+fn follow_position_setting(mut settings: tokio::sync::watch::Receiver<crate::core::settings::Settings>) {
+    tauri::async_runtime::spawn(async move {
+        while settings.changed().await.is_ok() {
+            let position = settings.borrow_and_update().general.position;
+            placement::set_position(native::island(), position);
+        }
+    });
 }

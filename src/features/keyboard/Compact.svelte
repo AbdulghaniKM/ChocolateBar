@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import type { KeyboardView } from "./types";
 
@@ -8,7 +9,7 @@
 </script>
 
 <div class="flex h-full w-full min-w-0 items-center justify-center gap-3 px-4">
-  <span class="text-[1rem] text-island-muted">{activity.compact.icon}</span>
+  <Glyph glyph={activity.compact.icon} class="size-4 text-island-muted" />
   {#key keyboard.layoutTag}
     <span class="tag text-[1.125rem] font-semibold tracking-[0.12em] text-island-text">
       {keyboard.layoutTag}
@@ -17,7 +18,7 @@
   <span
     class="rounded-pill px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider transition-all duration-300 ease-island
       {keyboard.capsLock
-      ? 'scale-100 bg-accent text-island opacity-100'
+      ? 'scale-100 bg-accent text-on-accent opacity-100'
       : 'scale-75 bg-island-raised text-island-muted opacity-40'}"
   >
     CAPS

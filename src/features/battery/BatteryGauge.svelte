@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Zap from "@lucide/svelte/icons/zap";
   let {
     percent,
     charging,
@@ -14,7 +15,7 @@
     <div class="fill" style:transform="scaleX({percent / 100})"></div>
     {#if charging}
       <div class="sweep"></div>
-      <span class="bolt">⚡</span>
+      <span class="bolt"><Zap class="bolt-icon" fill="currentColor" strokeWidth={0} /></span>
     {/if}
   </div>
   <div class="cap"></div>
@@ -22,7 +23,7 @@
 
 <style>
   .gauge {
-    --gauge-color: #f4f4f5;
+    --gauge-color: var(--color-island-text);
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -34,10 +35,10 @@
     height: 3.75rem;
   }
   .gauge.charging {
-    --gauge-color: #22c55e;
+    --gauge-color: var(--color-success);
   }
   .gauge.low {
-    --gauge-color: #ef4444;
+    --gauge-color: var(--color-danger);
   }
   .shell {
     position: relative;
@@ -78,11 +79,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.55rem;
-    filter: drop-shadow(0 0 0.15rem rgb(0 0 0 / 0.6));
+    color: var(--color-on-accent);
+    filter: drop-shadow(0 0 0.15rem rgb(255 255 255 / 0.4));
   }
-  .large .bolt {
-    font-size: 1.5rem;
+  .bolt :global(.bolt-icon) {
+    width: 0.55rem;
+    height: 0.55rem;
+  }
+  .large .bolt :global(.bolt-icon) {
+    width: 1.75rem;
+    height: 1.75rem;
   }
   .cap {
     width: 0.1875rem;

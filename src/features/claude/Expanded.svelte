@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Sparkle from "@lucide/svelte/icons/sparkle";
+  import KeyRound from "@lucide/svelte/icons/key-round";
   import type { Activity } from "../../lib/contracts";
   import type { ClaudeView } from "./claudeView";
   import SessionChips from "./SessionChips.svelte";
@@ -11,7 +13,7 @@
 {#if view.view === "permission"}
   <div class="flex h-full flex-col gap-3 p-4">
     <div class="flex items-center gap-2">
-      <span class="grid size-8 place-items-center rounded-xl bg-accent/15 text-base">🔐</span>
+      <span class="grid size-9 place-items-center rounded-xl bg-accent/15 text-accent"><KeyRound class="size-4" /></span>
       <div class="min-w-0">
         <p class="text-sm font-semibold">Claude wants to use {view.toolName}</p>
         {#if view.project}
@@ -31,7 +33,7 @@
         style:background-color="color-mix(in srgb, {activity.compact.accent} 18%, transparent)"
         style:color={activity.compact.accent}
       >
-        ✦
+        <Sparkle class="size-5" fill="currentColor" />
       </span>
       <div class="min-w-0">
         <p class="truncate text-base font-semibold">{view.project ?? "Claude Code"}</p>

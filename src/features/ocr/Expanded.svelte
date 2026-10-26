@@ -10,17 +10,13 @@
   const content = $derived(activity.expanded as OcrView);
 </script>
 
-<div class="flex h-full flex-col gap-3 p-4">
-  <div class="flex items-center gap-2 text-xs tracking-wide text-island-muted uppercase">
-    <span>📝</span>
-    <span>Recognized text</span>
-    {#if content.view === "text" && content.copied}
-      <span class="ml-auto rounded-pill bg-success/20 px-2 py-0.5 text-success normal-case">Copied</span>
-    {/if}
-  </div>
+<div class="flex h-full flex-col gap-2 px-4 pb-3">
+  {#if content.view === "text" && content.copied}
+    <span class="w-fit rounded-pill bg-success/15 px-2 py-0.5 text-[0.6875rem] font-medium text-success">Copied to clipboard</span>
+  {/if}
   {#if content.view === "text"}
     <p
-      class="min-h-0 flex-1 overflow-auto rounded-xl border border-island-border bg-island-raised p-3 text-sm leading-relaxed whitespace-pre-wrap select-text"
+      class="min-h-0 flex-1 island-scroll overflow-auto rounded-xl border border-island-border bg-island-raised p-3 text-sm leading-relaxed whitespace-pre-wrap select-text"
       dir="auto"
     >
       {content.text}

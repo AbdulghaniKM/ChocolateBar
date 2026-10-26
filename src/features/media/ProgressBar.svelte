@@ -19,17 +19,17 @@
   }
 </script>
 
-<div class="flex items-center gap-2 text-[0.6875rem] tabular-nums text-island-muted">
+<div class="flex items-center gap-2.5 text-[0.6875rem] tabular-nums text-island-muted">
   <span class="w-[2.25rem] text-right">{formatClock(positionMs)}</span>
   <button
-    class="group relative h-[1rem] flex-1 cursor-pointer"
+    class="group relative h-4 flex-1 cursor-pointer disabled:cursor-default"
     type="button"
     aria-label="Seek"
     disabled={durationMs <= 0}
     onclick={seek}
   >
-    <span class="absolute inset-x-0 top-1/2 h-[0.25rem] -translate-y-1/2 overflow-hidden rounded-pill bg-white/10 transition-[height] group-hover:h-[0.375rem]">
-      <span class="block h-full rounded-pill bg-island-text" style:width="{fraction * 100}%"></span>
+    <span class="absolute inset-x-0 top-1/2 h-[0.25rem] -translate-y-1/2 overflow-hidden rounded-pill bg-white/12 transition-[height] group-hover:h-[0.375rem]">
+      <span class="block h-full rounded-pill bg-island-text transition-colors group-hover:bg-accent" style:width="{fraction * 100}%"></span>
     </span>
   </button>
   <span class="w-[2.25rem]">{durationMs > 0 ? formatClock(durationMs) : "--:--"}</span>

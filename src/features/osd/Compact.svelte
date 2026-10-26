@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import LevelBar from "./LevelBar.svelte";
   import type { OsdExpanded } from "./types";
@@ -9,7 +10,7 @@
 </script>
 
 <div class="flex h-full w-full items-center gap-3 px-4">
-  <span class="w-[1.25rem] shrink-0 text-center text-base">{activity.compact.icon}</span>
+  <Glyph glyph={activity.compact.icon} class="size-[1.125rem] text-island-text" />
   <div class="min-w-0 flex-1">
     <LevelBar percent={osd.percent} muted={osd.muted} />
   </div>

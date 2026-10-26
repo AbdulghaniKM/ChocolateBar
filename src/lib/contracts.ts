@@ -72,8 +72,16 @@ export interface TeamRef {
   name: string;
 }
 
+export type VerticalAnchor = "top" | "middle" | "bottom";
+export type HorizontalAnchor = "left" | "center" | "right";
+export interface IslandPosition {
+  vertical: VerticalAnchor;
+  horizontal: HorizontalAnchor;
+  offsetX: number;
+  offsetY: number;
+}
 export interface Settings {
-  general: { hideInFullscreen: boolean; autostart: boolean };
+  general: { hideInFullscreen: boolean; autostart: boolean; position: IslandPosition };
   hotkeys: { micMute: string; ocr: string };
   sources: Record<string, boolean>;
   media: { lyrics: boolean; visualizer: boolean };
@@ -89,7 +97,11 @@ export interface Settings {
 export type SettingsPatch = { [K in keyof Settings]?: Partial<Settings[K]> };
 
 export const defaultSettings: Settings = {
-  general: { hideInFullscreen: true, autostart: false },
+  general: {
+    hideInFullscreen: true,
+    autostart: false,
+    position: { vertical: "bottom", horizontal: "center", offsetX: 0, offsetY: 0 },
+  },
   hotkeys: { micMute: "Ctrl+Alt+M", ocr: "Ctrl+Alt+O" },
   sources: {},
   media: { lyrics: true, visualizer: true },

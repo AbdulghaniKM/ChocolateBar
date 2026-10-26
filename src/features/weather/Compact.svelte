@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import type { WeatherView } from "./types";
 
@@ -9,8 +10,8 @@
 </script>
 
 <div class="flex h-full w-full min-w-0 items-center gap-2.5 px-3 text-sm">
-  <span class="text-xl leading-none transition-transform duration-300 ease-island" class:scale-110={isAlert}>
-    {activity.compact.icon}
+  <span class="text-accent transition-transform duration-300 ease-island" class:scale-110={isAlert}>
+    <Glyph glyph={activity.compact.icon} class="size-[1.125rem]" />
   </span>
   <span class="font-semibold tabular-nums">{activity.compact.title}</span>
   <span

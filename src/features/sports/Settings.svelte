@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Star from "@lucide/svelte/icons/star";
   import { onMount } from "svelte";
   import type { TeamRef } from "../../lib/contracts";
   import { sourceCommand } from "../../lib/ipc";
@@ -98,7 +99,7 @@
         {#each sports.favoriteTeams as favorite (teamKey(favorite))}
           <button
             type="button"
-            class="rounded-full bg-accent px-3 py-1 text-xs font-medium text-island transition-opacity hover:opacity-80"
+            class="rounded-full bg-accent px-3 py-1 text-xs font-medium text-on-accent transition-opacity hover:opacity-80"
             onclick={() => void settingsState.update({
               sports: {
                 favoriteTeams: sports.favoriteTeams.filter((team) => teamKey(team) !== teamKey(favorite)),
@@ -141,7 +142,7 @@
             <TeamLogo logo={team.logo} name={team.name} class="size-6" />
             <span class="flex-1 truncate">{team.name}</span>
             <span class="text-xs text-island-muted">{leagueName(team.league)}</span>
-            <span class="w-4 text-accent">{favoriteKeys.has(teamKey(team)) ? "★" : ""}</span>
+            <span class="w-4 text-accent">{#if favoriteKeys.has(teamKey(team))}<Star class="size-4" fill="currentColor" />{/if}</span>
           </button>
         {/each}
       {/if}

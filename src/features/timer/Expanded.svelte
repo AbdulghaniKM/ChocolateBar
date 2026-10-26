@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import Ring from "./Ring.svelte";
   import { useNow } from "./ticker.svelte";
@@ -23,7 +24,7 @@
 
 {#if view.mode === "alert"}
   <div class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-    <span class="animate-pulse text-5xl">{activity.compact.icon}</span>
+    <span class="animate-pulse text-accent"><Glyph glyph={activity.compact.icon} class="size-12" strokeWidth={1.75} /></span>
     <p class="text-xl font-semibold">{activity.compact.title}</p>
     <p class="text-sm text-island-muted">{view.label}</p>
   </div>

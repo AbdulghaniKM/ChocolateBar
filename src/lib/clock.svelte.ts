@@ -1,5 +1,6 @@
 const timeFormat = new Intl.DateTimeFormat([], { hour: "2-digit", minute: "2-digit" });
 const dateFormat = new Intl.DateTimeFormat([], { weekday: "long", day: "numeric", month: "long" });
+const shortDateFormat = new Intl.DateTimeFormat([], { weekday: "short", day: "numeric" });
 
 export function useClock() {
   let now = $state(new Date());
@@ -15,6 +16,9 @@ export function useClock() {
     },
     get date() {
       return dateFormat.format(now);
+    },
+    get shortDate() {
+      return shortDateFormat.format(now);
     },
   };
 }

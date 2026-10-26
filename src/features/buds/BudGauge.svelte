@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Zap from "@lucide/svelte/icons/zap";
   import { LOW_BATTERY_PERCENT } from "./types";
 
   let {
@@ -9,13 +10,13 @@
   }: { label: string; percent: number | null; charging: boolean; dimmed?: boolean } = $props();
 
   const isLow = $derived(percent !== null && percent <= LOW_BATTERY_PERCENT);
-  const ringColor = $derived(isLow ? "#ef4444" : charging ? "#22c55e" : "#818cf8");
+  const ringColor = $derived(isLow ? "var(--color-danger)" : charging ? "var(--color-success)" : "var(--color-accent)");
 </script>
 
 <div class="flex flex-col items-center gap-1.5 transition-opacity duration-300 {dimmed ? 'opacity-40' : ''}">
   <div class="relative size-[4.5rem]">
     <svg class="size-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
-      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="rgb(255 255 255 / 0.1)" stroke-width="3" />
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="var(--color-island-raised)" stroke-width="3" />
       <circle
         class="ring"
         class:charging
@@ -34,7 +35,7 @@
         {percent === null ? "-" : percent}<span class="text-[0.625rem] text-island-muted">{percent === null ? "" : "%"}</span>
       </span>
       {#if charging}
-        <span class="mt-0.5 text-[0.625rem] text-success">⚡</span>
+        <Zap class="mt-0.5 size-2.5 text-success" fill="currentColor" strokeWidth={0} />
       {/if}
     </div>
   </div>

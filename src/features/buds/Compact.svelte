@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import { isStatusView, LOW_BATTERY_PERCENT, type BudsExpanded } from "./types";
 
@@ -18,13 +19,13 @@
 </script>
 
 <div class="flex h-full w-full min-w-0 items-center gap-2.5 px-4">
-  <span class="text-[1.125rem]">{activity.compact.icon}</span>
+  <Glyph glyph={activity.compact.icon} class="size-[1.125rem] text-island-text" />
   {#if levels.length > 0}
     <span class="min-w-0 truncate text-[0.8125rem] font-medium text-island-text">{activity.compact.title}</span>
     <div class="ml-auto flex shrink-0 items-center gap-1.5">
       {#each levels as level (level.label)}
         <span
-          class="rounded-pill bg-white/8 px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums
+          class="rounded-pill bg-island-raised px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums
             {(level.percent ?? 100) <= LOW_BATTERY_PERCENT ? 'text-danger' : 'text-island-text'}"
         >
           {level.label} {level.percent}
@@ -38,7 +39,7 @@
     </div>
   {/if}
   {#if activity.compact.badge && levels.length > 0}
-    <span class="rounded-pill bg-indigo-400/20 px-2 py-0.5 text-[0.625rem] font-semibold text-indigo-300">
+    <span class="rounded-pill bg-accent/15 px-2 py-0.5 text-[0.625rem] font-semibold text-accent">
       {activity.compact.badge}
     </span>
   {/if}

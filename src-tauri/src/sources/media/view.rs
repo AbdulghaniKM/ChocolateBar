@@ -2,7 +2,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 use super::lrc::LyricLine;
-use super::session::Playback;
+use super::session::{Playback, RepeatMode, SourceSummary};
 use crate::core::activity::{now_ms, Activity, ActivityKind, CompactView, Priority};
 use crate::core::source::SourceContext;
 
@@ -16,6 +16,8 @@ pub struct TrackFrame<'a> {
     pub art: Option<&'a str>,
     pub lyrics: &'a [LyricLine],
     pub playback: &'a Playback,
+    pub source: &'a SourceSummary,
+    pub sources: &'a [SourceSummary],
 }
 
 #[derive(Serialize)]
@@ -33,6 +35,10 @@ struct ExpandedPayload<'a> {
     can_go_previous: bool,
     can_go_next: bool,
     lyrics: &'a [LyricLine],
+    shuffle: Option<bool>,
+    repeat: Option<RepeatMode>,
+    source: &'a SourceSummary,
+    sources: &'a [SourceSummary],
 }
 
 pub fn build_activity(ctx: &SourceContext, frame: &TrackFrame) -> Activity {
@@ -52,7 +58,7 @@ fn priority_for(playing: bool) -> Priority {
 fn compact_view(frame: &TrackFrame) -> CompactView {
     let view = CompactView::new(MEDIA_ICON, frame.title);
     if frame.artist.is_empty() {
-        view
+        view.subtitle(frame.source.app.as_str())
     } else {
         view.subtitle(frame.artist)
     }
@@ -73,5 +79,9 @@ fn expanded_payload<'a>(frame: &TrackFrame<'a>) -> ExpandedPayload<'a> {
         can_go_previous: playback.can_go_previous,
         can_go_next: playback.can_go_next,
         lyrics: frame.lyrics,
+        shuffle: playback.shuffle,
+        repeat: playback.repeat,
+        source: frame.source,
+        sources: frame.sources,
     }
 }

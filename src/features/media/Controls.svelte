@@ -1,31 +1,71 @@
 <script lang="ts">
+  import Pause from "@lucide/svelte/icons/pause";
+  import Play from "@lucide/svelte/icons/play";
+  import Repeat from "@lucide/svelte/icons/repeat";
+  import Repeat1 from "@lucide/svelte/icons/repeat-1";
+  import Shuffle from "@lucide/svelte/icons/shuffle";
+  import SkipBack from "@lucide/svelte/icons/skip-back";
+  import SkipForward from "@lucide/svelte/icons/skip-forward";
   import { activityAction } from "../../lib/ipc";
-  import type { MediaExpanded } from "./types";
+  import type { MediaExpanded, RepeatMode } from "./types";
 
   let { activityId, media }: { activityId: string; media: MediaExpanded } = $props();
 
-  const send = (action: string) => void activityAction(activityId, action);
+  const NEXT_REPEAT: Record<RepeatMode, RepeatMode> = { off: "list", list: "track", track: "off" };
+  const REPEAT_LABELS: Record<RepeatMode, string> = { off: "Repeat off", list: "Repeat all", track: "Repeat one" };
+
+  const send = (action: string, value?: unknown) => void activityAction(activityId, action, value);
   const sideButton =
-    "flex size-[2.25rem] items-center justify-center rounded-full text-island-text transition enabled:hover:bg-white/10 enabled:active:scale-90 disabled:opacity-30";
+    "grid size-10 place-items-center rounded-full text-island-text transition-[background-color,transform] duration-150 enabled:hover:bg-island-hover enabled:active:scale-90 disabled:opacity-30";
+  const modeButton =
+    "relative grid size-9 place-items-center rounded-full transition-[background-color,color] duration-150 hover:bg-island-hover";
 </script>
 
-<div class="flex items-center justify-center gap-3">
+<div class="flex items-center justify-center gap-2">
+  {#if media.shuffle !== null}
+    <button
+      class="{modeButton} {media.shuffle ? 'text-accent' : 'text-island-subtle'}"
+      type="button"
+      aria-label="Shuffle"
+      aria-pressed={media.shuffle}
+      onclick={() => send("shuffle", !media.shuffle)}
+    >
+      <Shuffle class="size-4" />
+      {#if media.shuffle}<span class="absolute bottom-1 size-1 rounded-full bg-accent"></span>{/if}
+    </button>
+  {/if}
   <button class={sideButton} type="button" aria-label="Previous" disabled={!media.canGoPrevious} onclick={() => send("prev")}>
-    <svg class="size-[1.125rem]" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z" /></svg>
+    <SkipBack class="size-5" fill="currentColor" />
   </button>
   <button
-    class="flex size-[2.75rem] items-center justify-center rounded-full bg-island-text text-island transition hover:scale-105 active:scale-90"
+    class="grid size-12 place-items-center rounded-full bg-island-text text-island transition-transform duration-150 hover:scale-105 active:scale-95"
     type="button"
     aria-label={media.playing ? "Pause" : "Play"}
     onclick={() => send("toggle")}
   >
     {#if media.playing}
-      <svg class="size-[1.25rem]" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+      <Pause class="size-5" fill="currentColor" />
     {:else}
-      <svg class="size-[1.25rem]" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z" /></svg>
+      <Play class="ml-0.5 size-5" fill="currentColor" />
     {/if}
   </button>
   <button class={sideButton} type="button" aria-label="Next" disabled={!media.canGoNext} onclick={() => send("next")}>
-    <svg class="size-[1.125rem]" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z" /></svg>
+    <SkipForward class="size-5" fill="currentColor" />
   </button>
+  {#if media.repeat !== null}
+    <button
+      class="{modeButton} {media.repeat === 'off' ? 'text-island-subtle' : 'text-accent'}"
+      type="button"
+      aria-label={REPEAT_LABELS[media.repeat]}
+      title={REPEAT_LABELS[media.repeat]}
+      onclick={() => media.repeat && send("repeat", NEXT_REPEAT[media.repeat])}
+    >
+      {#if media.repeat === "track"}
+        <Repeat1 class="size-4" />
+      {:else}
+        <Repeat class="size-4" />
+      {/if}
+      {#if media.repeat !== "off"}<span class="absolute bottom-1 size-1 rounded-full bg-accent"></span>{/if}
+    </button>
+  {/if}
 </div>

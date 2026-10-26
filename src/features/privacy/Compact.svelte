@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Glyph from "../../shell/Glyph.svelte";
   import type { Activity } from "../../lib/contracts";
   import type { PrivacyExpanded } from "./types";
 
@@ -18,7 +19,7 @@
     {/if}
     <span class="relative inline-flex size-full rounded-full" style:background-color={activity.compact.accent}></span>
   </span>
-  <span class="shrink-0 text-base">{activity.compact.icon}</span>
+  <Glyph glyph={activity.compact.icon} class="size-4 text-island-text" />
   <div class="flex min-w-0 flex-1 flex-col leading-tight">
     <span class="truncate text-[0.8125rem] font-medium text-island-text">{activity.compact.title}</span>
     {#if activity.compact.subtitle}

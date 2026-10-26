@@ -43,7 +43,7 @@ getrandom = "0.4.3"
 [target.'cfg(windows)'.dependencies]
 windows-core = "0.62"
 windows = { version = "0.62", features = [
-  "Foundation", "Foundation_Collections", "Storage_Streams", "Media_Control", "Media_Ocr",
+  "Foundation", "Foundation_Collections", "Storage_Streams", "Media", "Media_Control", "Media_Ocr",
   "Globalization", "Graphics_Imaging", "UI_Notifications", "UI_Notifications_Management",
   "Devices_Enumeration", "Devices_Bluetooth", "Devices_Bluetooth_Rfcomm",
   "Devices_Bluetooth_GenericAttributeProfile", "Networking_Sockets", "Networking_Connectivity",

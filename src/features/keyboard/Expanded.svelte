@@ -9,7 +9,7 @@
 
 <div class="flex h-full flex-col items-center justify-center gap-5 px-6">
   <div
-    class="flex size-[7rem] items-center justify-center rounded-[1.75rem] border border-white/10 bg-white/5 shadow-[0_0_2rem_rgb(255_255_255/0.04)] backdrop-blur"
+    class="flex size-[7rem] items-center justify-center tile rounded-[1.75rem]"
   >
     {#key keyboard.layoutTag}
       <span class="tag text-[3rem] font-semibold tracking-[0.1em] text-island-text">{keyboard.layoutTag}</span>
@@ -21,7 +21,7 @@
       class="rounded-pill border px-3 py-1 text-[0.75rem] font-semibold tracking-wider transition-colors duration-300
         {keyboard.capsLock
         ? 'border-accent/60 bg-accent/15 text-accent'
-        : 'border-white/10 bg-white/5 text-island-muted'}"
+        : 'border-island-border bg-island-raised text-island-muted'}"
     >
       {keyboard.capsLock ? "CAPS LOCK ON" : "Caps Lock off"}
     </span>

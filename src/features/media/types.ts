@@ -3,6 +3,15 @@ export interface LyricLine {
   text: string;
 }
 
+export type RepeatMode = "off" | "track" | "list";
+
+export interface MediaSource {
+  id: string;
+  app: string;
+  kind: "spotify" | "browser" | "app";
+  playing: boolean;
+}
+
 export interface MediaExpanded {
   title: string;
   artist: string;
@@ -16,4 +25,8 @@ export interface MediaExpanded {
   canGoPrevious: boolean;
   canGoNext: boolean;
   lyrics: LyricLine[];
+  shuffle: boolean | null;
+  repeat: RepeatMode | null;
+  source: MediaSource;
+  sources: MediaSource[];
 }

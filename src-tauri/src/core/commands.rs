@@ -10,7 +10,7 @@ use super::error::{AppError, AppResult};
 use super::hub::HubHandle;
 use super::settings::{Settings, SettingsStore};
 use crate::window::click_through::{HitRect, HitRegions};
-use crate::window::settings_window;
+use crate::window::{native, placement, settings_window};
 
 const SOURCE_COMMAND_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -45,6 +45,11 @@ pub fn cycle_activity(hub: State<'_, HubHandle>, direction: i32) {
 #[tauri::command]
 pub fn set_hit_regions(regions: State<'_, HitRegions>, rects: Vec<HitRect>) {
     regions.replace(rects);
+}
+
+#[tauri::command]
+pub fn set_island_size(width: f64, height: f64) {
+    placement::request_size(native::island(), width, height);
 }
 
 #[tauri::command]
