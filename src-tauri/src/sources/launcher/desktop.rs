@@ -4,14 +4,19 @@ use std::mem::size_of;
 use std::os::windows::process::CommandExt;
 use std::process::Command;
 
-use windows::core::BOOL;
-use windows::Win32::Foundation::{HWND, LPARAM, RECT};
+use windows::core::{BOOL, PWSTR};
+use windows::Win32::Foundation::{CloseHandle, HWND, LPARAM, RECT};
 use windows::Win32::Graphics::Dwm::{DwmGetWindowAttribute, DWMWA_CLOAKED, DWMWA_EXTENDED_FRAME_BOUNDS};
 use windows::Win32::Graphics::Gdi::{MonitorFromWindow, MONITOR_DEFAULTTONEAREST};
+use windows::Win32::System::Threading::{
+    OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+};
+use windows::Win32::UI::Input::KeyboardAndMouse::{keybd_event, KEYEVENTF_KEYUP, VK_MENU};
 use windows::Win32::UI::WindowsAndMessaging::{
-    EnumWindows, GetForegroundWindow, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowTextLengthW,
-    GetWindowThreadProcessId, IsWindow, IsWindowVisible, SetWindowPos, ShowWindow, GWL_EXSTYLE, GW_OWNER,
-    SWP_NOACTIVATE, SWP_NOZORDER, SW_MAXIMIZE, SW_RESTORE, WS_EX_TOOLWINDOW,
+    EnumWindows, GetWindow, GetWindowLongPtrW, GetWindowRect, GetWindowTextLengthW,
+    GetWindowTextW, GetWindowThreadProcessId, IsIconic, IsWindow, IsWindowVisible, SetForegroundWindow,
+    SetWindowPos, ShowWindow, GWL_EXSTYLE, GW_OWNER, SWP_NOACTIVATE, SWP_NOZORDER, SW_MAXIMIZE, SW_RESTORE,
+    WS_EX_TOOLWINDOW,
 };
 
 use super::layout::{target_rect, Rect};
@@ -57,10 +62,6 @@ pub fn snapshot() -> HashSet<WindowId> {
     app_windows().into_iter().collect()
 }
 
-pub fn foreground() -> WindowId {
-    id_of(unsafe { GetForegroundWindow() })
-}
-
 pub fn exists(id: WindowId) -> bool {
     let hwnd = handle(id);
     unsafe { IsWindow(Some(hwnd)) }.as_bool() && unsafe { IsWindowVisible(hwnd) }.as_bool()
@@ -81,6 +82,45 @@ pub fn is_app_window(id: WindowId) -> bool {
     let mut process_id = 0u32;
     unsafe { GetWindowThreadProcessId(hwnd, Some(&mut process_id)) };
     process_id != std::process::id()
+}
+
+pub fn title_of(id: WindowId) -> String {
+    let hwnd = handle(id);
+    let length = unsafe { GetWindowTextLengthW(hwnd) }.max(0) as usize;
+    let mut buffer = vec![0u16; length + 1];
+    let copied = unsafe { GetWindowTextW(hwnd, &mut buffer) }.max(0) as usize;
+    String::from_utf16_lossy(&buffer[..copied])
+}
+
+/// The executable's file name, lower-cased (for example `code.exe`).
+pub fn process_name_of(id: WindowId) -> String {
+    let mut process_id = 0u32;
+    unsafe { GetWindowThreadProcessId(handle(id), Some(&mut process_id)) };
+    let Ok(process) = (unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, process_id) }) else {
+        return String::new();
+    };
+    let mut buffer = vec![0u16; 1024];
+    let mut length = buffer.len() as u32;
+    let named = unsafe { QueryFullProcessImageNameW(process, PROCESS_NAME_WIN32, PWSTR(buffer.as_mut_ptr()), &mut length) };
+    let _ = unsafe { CloseHandle(process) };
+    if named.is_err() {
+        return String::new();
+    }
+    let path = String::from_utf16_lossy(&buffer[..length as usize]);
+    path.rsplit(['\\', '/']).next().unwrap_or_default().to_lowercase()
+}
+
+/// Windows only lets the foreground app hand over focus; a synthetic Alt tap lifts that lock for our request.
+pub fn bring_to_front(id: WindowId) {
+    let hwnd = handle(id);
+    if unsafe { IsIconic(hwnd) }.as_bool() {
+        let _ = unsafe { ShowWindow(hwnd, SW_RESTORE) };
+    }
+    unsafe {
+        keybd_event(VK_MENU.0 as u8, 0, Default::default(), 0);
+        keybd_event(VK_MENU.0 as u8, 0, KEYEVENTF_KEYUP, 0);
+    }
+    let _ = unsafe { SetForegroundWindow(hwnd) };
 }
 
 fn is_cloaked(hwnd: HWND) -> bool {

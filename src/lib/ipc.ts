@@ -31,6 +31,8 @@ export const focusActivity = (id: string) => invoke<void>("focus_activity", { id
 export const setHitRegions = (rects: HitRect[]) =>
   invoke<void>("set_hit_regions", { rects });
 
+export const setKeyboardInput = (enabled: boolean) => invoke<void>("set_keyboard_input", { enabled });
+
 export const setIslandSize = (width: number, height: number) =>
   invoke<void>("set_island_size", { width, height });
 

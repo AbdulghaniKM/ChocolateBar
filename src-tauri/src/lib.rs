@@ -32,6 +32,7 @@ pub fn run() {
             commands::focus_activity,
             commands::set_hit_regions,
             commands::set_island_size,
+            commands::set_keyboard_input,
             commands::set_expanded,
             commands::get_settings,
             commands::update_settings,

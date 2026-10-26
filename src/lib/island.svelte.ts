@@ -12,6 +12,7 @@ import {
   onIslandFocus,
   onIslandVisibility,
   setExpanded,
+  setKeyboardInput,
 } from "./ipc";
 
 const COLLAPSE_DELAY_MS = 1500;
@@ -56,7 +57,10 @@ class Island {
   setExpanded(expanded: boolean) {
     this.cancelCollapse();
     this.expanded = expanded;
-    if (!expanded) this.showingHub = false;
+    if (!expanded) {
+      this.showingHub = false;
+      void setKeyboardInput(false);
+    }
     void setExpanded(expanded);
   }
 
@@ -84,7 +88,8 @@ class Island {
 
   scheduleCollapse() {
     this.cancelCollapse();
-    if (!this.expanded) return;
+    const typing = document.activeElement instanceof HTMLTextAreaElement || document.activeElement instanceof HTMLInputElement;
+    if (!this.expanded || typing) return;
     this.collapseTimer = setTimeout(() => this.setExpanded(false), COLLAPSE_DELAY_MS);
   }
 

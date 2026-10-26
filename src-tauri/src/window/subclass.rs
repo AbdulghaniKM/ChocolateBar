@@ -25,10 +25,10 @@ unsafe extern "system" fn procedure(
     _reference_data: usize,
 ) -> LRESULT {
     match message {
-        WM_MOUSEACTIVATE => no_activate::refuse_mouse_activation(),
+        WM_MOUSEACTIVATE => no_activate::mouse_activation(),
         WM_ACTIVATE => {
             let result = unsafe { DefSubclassProc(hwnd, message, wparam, lparam) };
-            if (wparam.0 & 0xFFFF) as u32 != WA_INACTIVE {
+            if (wparam.0 & 0xFFFF) as u32 != WA_INACTIVE && !no_activate::keyboard_wanted() {
                 no_activate::restore_external_foreground();
             }
             result

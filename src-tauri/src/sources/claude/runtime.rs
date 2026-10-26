@@ -7,6 +7,7 @@ use serde_json::{json, Value};
 
 use super::cards::{apply_change, DISMISS_ACTION};
 use super::conversation;
+use super::reply;
 use super::hooks_install::{self, HookEndpoint, HooksStatus};
 use super::permission::{Decision, PermissionBroker};
 use super::server::RunningServer;
@@ -102,6 +103,7 @@ impl ClaudeRuntime {
             "set_default_permission_mode" => self.set_default_permission_mode(&command.payload),
             "set_default_model" => self.set_default_model(&command.payload),
             "conversation" => self.conversation(&command.payload),
+            "reply" => self.reply(&command.payload),
             unknown => Err(AppError::Source(format!("unknown claude command {unknown}"))),
         };
         match outcome {
@@ -138,6 +140,17 @@ impl ClaudeRuntime {
         let session_id = payload.get("sessionId").and_then(Value::as_str).unwrap_or_default();
         let found = self.sessions.transcript_of(session_id).map(|path| conversation::read(&path)).unwrap_or_default();
         Ok(serde_json::to_value(found)?)
+    }
+
+    fn reply(&self, payload: &Value) -> AppResult<Value> {
+        let text = payload.get("text").and_then(Value::as_str).unwrap_or_default().trim();
+        if text.is_empty() {
+            return Err(AppError::Source("there is nothing to send".into()));
+        }
+        let session_id = payload.get("sessionId").and_then(Value::as_str).unwrap_or_default();
+        let project = self.sessions.project_of(session_id);
+        let window = reply::hand_off(text, project.as_deref()).map_err(AppError::Source)?;
+        Ok(json!({ "window": window }))
     }
 
     fn install_hooks(&self) -> AppResult<Value> {

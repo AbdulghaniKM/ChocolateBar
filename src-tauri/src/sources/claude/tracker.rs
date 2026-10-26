@@ -167,6 +167,10 @@ impl SessionTracker {
             .collect()
     }
 
+    pub fn project_of(&self, session_id: &str) -> Option<String> {
+        self.lock().get(session_id)?.project.clone()
+    }
+
     pub fn transcript_of(&self, session_id: &str) -> Option<PathBuf> {
         self.lock().get(session_id)?.watcher.as_ref().map(|watcher| watcher.path().to_path_buf())
     }

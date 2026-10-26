@@ -4,6 +4,7 @@
   import type { Activity } from "../../lib/contracts";
   import type { ClaudeView } from "./claudeView";
   import ConversationView from "./ConversationView.svelte";
+  import ReplyBox from "./ReplyBox.svelte";
   import SessionChips from "./SessionChips.svelte";
 
   let { activity }: { activity: Activity } = $props();
@@ -38,8 +39,11 @@
         <ConversationView sessionId={view.sessionId} />
       {/if}
     </div>
+    {#if view.sessionId}
+      <div class="mt-2 shrink-0"><ReplyBox sessionId={view.sessionId} /></div>
+    {/if}
     <div
-      class="mt-2 flex h-9 shrink-0 items-center gap-2 rounded-xl border px-3 text-[0.8125rem]
+      class="mt-2 flex h-8 shrink-0 items-center gap-2 rounded-xl border px-3 text-[0.75rem]
         {view.state === 'waiting' ? 'border-accent/50 bg-accent/10' : 'border-island-border bg-island-raised/70'}"
       aria-live="polite"
     >

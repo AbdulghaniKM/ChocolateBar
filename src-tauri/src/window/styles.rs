@@ -21,6 +21,14 @@ pub fn set_click_through(hwnd: HWND, enabled: bool) {
     }
 }
 
+pub fn set_no_activate(hwnd: HWND, enabled: bool) {
+    let current = read_extended_styles(hwnd);
+    let updated = if enabled { current | WS_EX_NOACTIVATE.0 } else { current & !WS_EX_NOACTIVATE.0 };
+    if updated != current {
+        write_extended_styles(hwnd, updated);
+    }
+}
+
 fn apply_extended_styles(hwnd: HWND) {
     let current = read_extended_styles(hwnd);
     write_extended_styles(hwnd, with_overlay_styles(current));

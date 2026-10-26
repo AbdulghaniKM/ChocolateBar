@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use serde_json::Value;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Manager, State};
 use tokio::sync::oneshot;
 
 use super::activity::{ActionRequest, Activity, CommandReply, SourceCommand};
@@ -10,7 +10,7 @@ use super::error::{AppError, AppResult};
 use super::hub::HubHandle;
 use super::settings::{Settings, SettingsStore};
 use crate::window::click_through::{HitRect, HitRegions};
-use crate::window::{native, placement, settings_window};
+use crate::window::{native, no_activate, placement, settings_window};
 
 const SOURCE_COMMAND_TIMEOUT: Duration = Duration::from_secs(30);
 
@@ -50,6 +50,17 @@ pub fn set_hit_regions(regions: State<'_, HitRegions>, rects: Vec<HitRect>) {
 #[tauri::command]
 pub fn focus_activity(hub: State<'_, HubHandle>, id: String) {
     hub.focus(id);
+}
+
+#[tauri::command]
+pub fn set_keyboard_input(app: AppHandle, enabled: bool) -> AppResult<()> {
+    no_activate::set_keyboard_wanted(enabled);
+    if enabled {
+        if let Some(window) = app.get_webview_window("main") {
+            window.set_focus()?;
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]

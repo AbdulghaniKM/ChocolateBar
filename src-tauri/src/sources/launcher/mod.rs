@@ -1,6 +1,7 @@
 mod apps;
-mod desktop;
+pub(crate) mod desktop;
 mod layout;
+mod matching;
 mod runner;
 
 use std::sync::{Arc, Mutex};
