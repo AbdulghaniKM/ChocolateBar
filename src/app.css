@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --radius-island: 1.75rem;
+  --radius-pill: 62.4375rem;
+  --color-island: #0b0b0d;
+  --color-island-raised: #1a1a1f;
+  --color-island-border: #2a2a31;
+  --color-island-text: #f4f4f5;
+  --color-island-muted: #a1a1aa;
+  --color-accent: #f59e0b;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --ease-island: cubic-bezier(0.32, 0.72, 0, 1);
+  --island-duration: 420ms;
+}
+
+html,
+body {
+  @apply bg-transparent overflow-hidden select-none;
+  margin: 0;
+  height: 100%;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+#app {
+  height: 100%;
+}
