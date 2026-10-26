@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn top_down_24_bit_rows_respect_four_byte_padding() {
-        let data = [1, 2, 3, 0, 0, 0, 4, 5, 6, 0, 0, 0];
+        let data = [1, 2, 3, 0, 4, 5, 6, 0];
         let image = bgra_from_dib(&dib(1, -2, 24, BI_RGB, &data)).unwrap();
         assert_eq!(image.pixels, vec![1, 2, 3, OPAQUE, 4, 5, 6, OPAQUE]);
     }

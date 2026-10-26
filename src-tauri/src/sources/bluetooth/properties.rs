@@ -1,4 +1,3 @@
-use windows::Foundation::Collections::{IIterable, IMapView};
 use windows::Foundation::IPropertyValue;
 use windows_core::{IInspectable, Interface, HSTRING};
 
@@ -24,19 +23,31 @@ impl PropertyPatch {
         Self { battery: Some(percent), ..Self::default() }
     }
 
-    pub fn from_properties(properties: &IMapView<HSTRING, IInspectable>) -> Self {
+    pub fn from_lookup(lookup: impl Fn(&HSTRING) -> Option<IInspectable>) -> Self {
+        let read = |key: &str| lookup(&HSTRING::from(key)).and_then(|value| value.cast::<IPropertyValue>().ok());
         Self {
-            address: read_property(properties, ADDRESS_KEY).and_then(|value| value.GetString().ok()).map(normalize_address),
-            connected: read_property(properties, CONNECTED_KEY).and_then(|value| value.GetBoolean().ok()),
-            battery: read_property(properties, CLASSIC_BATTERY_KEY).and_then(|value| read_percent(&value)),
+            address: read(ADDRESS_KEY).and_then(|value| value.GetString().ok()).map(normalize_address),
+            connected: read(CONNECTED_KEY).and_then(|value| value.GetBoolean().ok()),
+            battery: read(CLASSIC_BATTERY_KEY).and_then(|value| read_percent(&value)),
         }
     }
 }
 
-pub fn requested_property_keys() -> IIterable<HSTRING> {
-    let keys = [CONNECTED_KEY, ADDRESS_KEY, CLASSIC_BATTERY_KEY].map(HSTRING::from).to_vec();
-    IIterable::<HSTRING>::from(keys)
+pub fn property_key_names() -> [&'static str; 3] {
+    [CONNECTED_KEY, ADDRESS_KEY, CLASSIC_BATTERY_KEY]
 }
+
+macro_rules! requested_property_keys {
+    () => {{
+        let keys = windows::Devices::Enumeration::DevicePicker::new()?.RequestedProperties()?;
+        for name in $crate::sources::bluetooth::properties::property_key_names() {
+            keys.Append(&windows_core::HSTRING::from(name))?;
+        }
+        keys
+    }};
+}
+
+pub(crate) use requested_property_keys;
 
 pub fn normalize_address(address: impl ToString) -> String {
     address
@@ -45,14 +56,6 @@ pub fn normalize_address(address: impl ToString) -> String {
         .filter(char::is_ascii_hexdigit)
         .collect::<String>()
         .to_lowercase()
-}
-
-fn read_property(properties: &IMapView<HSTRING, IInspectable>, key: &str) -> Option<IPropertyValue> {
-    let key = HSTRING::from(key);
-    if !properties.HasKey(&key).unwrap_or(false) {
-        return None;
-    }
-    properties.Lookup(&key).ok()?.cast::<IPropertyValue>().ok()
 }
 
 fn read_percent(value: &IPropertyValue) -> Option<u8> {

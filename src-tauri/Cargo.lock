@@ -598,6 +598,7 @@ dependencies = [
  "cpal",
  "crossbeam-channel",
  "dirs 7.0.0",
+ "getrandom 0.4.3",
  "keyvalues-parser",
  "log",
  "notify",

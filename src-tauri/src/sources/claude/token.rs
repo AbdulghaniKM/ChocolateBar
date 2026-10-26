@@ -1,6 +1,4 @@
-use std::collections::hash_map::RandomState;
-use std::hash::{BuildHasher, Hasher};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::fmt::Write;
 
 use serde_json::json;
 use tauri::Manager;
@@ -8,20 +6,19 @@ use tauri::Manager;
 use crate::core::settings::SettingsStore;
 use crate::core::source::SourceContext;
 
-const TOKEN_CHUNKS: u64 = 4;
+const TOKEN_BYTES: usize = 32;
 
 pub fn generate_token() -> String {
-    let nanos = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_or(0, |elapsed| elapsed.as_nanos());
-    (0..TOKEN_CHUNKS).map(|chunk| random_chunk(nanos, chunk)).collect()
+    let mut bytes = [0u8; TOKEN_BYTES];
+    getrandom::fill(&mut bytes).expect("operating system random source is unavailable");
+    encode_hex(&bytes)
 }
 
-fn random_chunk(seed: u128, chunk: u64) -> String {
-    let mut hasher = RandomState::new().build_hasher();
-    hasher.write_u128(seed);
-    hasher.write_u64(chunk);
-    format!("{:016x}", hasher.finish())
+fn encode_hex(bytes: &[u8]) -> String {
+    bytes.iter().fold(String::with_capacity(bytes.len() * 2), |mut hex, byte| {
+        let _ = write!(hex, "{byte:02x}");
+        hex
+    })
 }
 
 pub fn token_from_settings_or_new(ctx: &SourceContext) -> String {

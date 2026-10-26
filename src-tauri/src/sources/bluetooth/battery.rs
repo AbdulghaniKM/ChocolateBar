@@ -20,15 +20,21 @@ const BATTERY_SERVICE: GUID = GUID::from_u128(0x0000180f_0000_1000_8000_00805f9b
 const BATTERY_LEVEL: GUID = GUID::from_u128(0x00002a19_0000_1000_8000_00805f9b34fb);
 
 pub fn read_classic_battery(device_id: &str) -> Option<u8> {
+    classic_battery_percent(device_id)
+        .inspect_err(|error| log::debug!("bluetooth: classic battery unavailable for {device_id}: {error}"))
+        .ok()
+        .flatten()
+}
+
+fn classic_battery_percent(device_id: &str) -> Result<Option<u8>> {
     let information = DeviceInformation::CreateFromIdAsyncWithKindAndAdditionalProperties(
         &HSTRING::from(device_id),
-        &requested_property_keys(),
+        &requested_property_keys!(),
         DeviceInformationKind::AssociationEndpoint,
-    )
-    .ok()?
-    .join()
-    .ok()?;
-    PropertyPatch::from_properties(&information.Properties().ok()?).battery
+    )?
+    .join()?;
+    let properties = information.Properties()?;
+    Ok(PropertyPatch::from_lookup(|key| properties.Lookup(key).ok()).battery)
 }
 
 #[derive(Default)]

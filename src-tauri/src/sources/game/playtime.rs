@@ -100,7 +100,7 @@ impl PlaytimeTracker {
 
     pub fn totals(&self) -> Vec<PlaytimeEntry> {
         let mut entries: Vec<PlaytimeEntry> = self.ledger.totals.values().cloned().collect();
-        entries.sort_by(|a, b| b.seconds.cmp(&a.seconds));
+        entries.sort_by_key(|entry| std::cmp::Reverse(entry.seconds));
         entries
     }
 

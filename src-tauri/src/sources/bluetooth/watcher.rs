@@ -8,6 +8,13 @@ use windows_core::{Result, HSTRING};
 
 use super::properties::{requested_property_keys, LinkKind, PropertyPatch};
 
+macro_rules! patch_from {
+    ($source:expr) => {{
+        let properties = $source.Properties()?;
+        PropertyPatch::from_lookup(|key| properties.Lookup(key).ok())
+    }};
+}
+
 #[derive(Debug)]
 pub enum DeviceMessage {
     Added { id: String, kind: LinkKind, name: String, patch: PropertyPatch },
@@ -18,9 +25,11 @@ pub enum DeviceMessage {
 
 pub const WATCHER_COUNT: usize = 2;
 
+type RemoveHandler = fn(&DeviceWatcher, i64) -> Result<()>;
+
 struct WatcherSubscription {
     watcher: DeviceWatcher,
-    tokens: Vec<(fn(&DeviceWatcher, i64) -> Result<()>, i64)>,
+    tokens: Vec<(RemoveHandler, i64)>,
 }
 
 impl Drop for WatcherSubscription {
@@ -48,12 +57,12 @@ impl BluetoothWatchers {
 fn start_watcher(selector: &HSTRING, kind: LinkKind, messages: &Sender<DeviceMessage>) -> Result<WatcherSubscription> {
     let watcher = DeviceInformation::CreateWatcherWithKindAqsFilterAndAdditionalProperties(
         selector,
-        &requested_property_keys(),
+        &requested_property_keys!(),
         DeviceInformationKind::AssociationEndpoint,
     )?;
     let tokens = vec![
         (
-            DeviceWatcher::RemoveAdded as fn(&DeviceWatcher, i64) -> Result<()>,
+            DeviceWatcher::RemoveAdded as RemoveHandler,
             watcher.Added(&added_handler(kind, messages.clone()))?,
         ),
         (DeviceWatcher::RemoveUpdated, watcher.Updated(&updated_handler(messages.clone()))?),
@@ -71,13 +80,13 @@ fn added_handler(
     kind: LinkKind,
     messages: Sender<DeviceMessage>,
 ) -> TypedEventHandler<DeviceWatcher, DeviceInformation> {
-    TypedEventHandler::new(move |_, information| {
+    TypedEventHandler::<DeviceWatcher, DeviceInformation>::new(move |_, information| {
         let information = information.ok()?;
         let message = DeviceMessage::Added {
             id: information.Id()?.to_string(),
             kind,
             name: information.Name()?.to_string(),
-            patch: PropertyPatch::from_properties(&information.Properties()?),
+            patch: patch_from!(information),
         };
         let _ = messages.send(message);
         Ok(())
@@ -85,11 +94,11 @@ fn added_handler(
 }
 
 fn updated_handler(messages: Sender<DeviceMessage>) -> TypedEventHandler<DeviceWatcher, DeviceInformationUpdate> {
-    TypedEventHandler::new(move |_, update| {
+    TypedEventHandler::<DeviceWatcher, DeviceInformationUpdate>::new(move |_, update| {
         let update = update.ok()?;
         let message = DeviceMessage::Updated {
             id: update.Id()?.to_string(),
-            patch: PropertyPatch::from_properties(&update.Properties()?),
+            patch: patch_from!(update),
         };
         let _ = messages.send(message);
         Ok(())
@@ -97,7 +106,7 @@ fn updated_handler(messages: Sender<DeviceMessage>) -> TypedEventHandler<DeviceW
 }
 
 fn removed_handler(messages: Sender<DeviceMessage>) -> TypedEventHandler<DeviceWatcher, DeviceInformationUpdate> {
-    TypedEventHandler::new(move |_, update| {
+    TypedEventHandler::<DeviceWatcher, DeviceInformationUpdate>::new(move |_, update| {
         let _ = messages.send(DeviceMessage::Removed { id: update.ok()?.Id()?.to_string() });
         Ok(())
     })
@@ -106,7 +115,7 @@ fn removed_handler(messages: Sender<DeviceMessage>) -> TypedEventHandler<DeviceW
 fn enumeration_handler(
     messages: Sender<DeviceMessage>,
 ) -> TypedEventHandler<DeviceWatcher, windows_core::IInspectable> {
-    TypedEventHandler::new(move |_, _| {
+    TypedEventHandler::<DeviceWatcher, windows_core::IInspectable>::new(move |_, _| {
         let _ = messages.send(DeviceMessage::EnumerationCompleted);
         Ok(())
     })
