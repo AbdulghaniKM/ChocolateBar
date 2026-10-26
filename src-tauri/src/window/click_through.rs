@@ -8,6 +8,8 @@ use tauri::WebviewWindow;
 use windows::Win32::Foundation::POINT;
 use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
+use super::{native, styles};
+
 const POLL_INTERVAL: Duration = Duration::from_millis(16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
@@ -52,12 +54,9 @@ pub fn spawn(window: WebviewWindow, regions: HitRegions, shutdown: Arc<AtomicBoo
 }
 
 fn poll_cursor(window: &WebviewWindow, regions: &HitRegions, shutdown: &AtomicBool) {
-    let mut ignoring: Option<bool> = None;
     while !shutdown.load(Ordering::Relaxed) {
         let should_ignore = !cursor_over_hit_region(window, regions);
-        if ignoring != Some(should_ignore) && window.set_ignore_cursor_events(should_ignore).is_ok() {
-            ignoring = Some(should_ignore);
-        }
+        styles::set_click_through(native::island(), should_ignore);
         thread::sleep(POLL_INTERVAL);
     }
 }

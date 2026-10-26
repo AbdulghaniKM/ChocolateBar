@@ -1,12 +1,12 @@
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
-use super::cards::{permission_activity, session_activity};
+use super::cards::{apply_change, permission_activity};
 use super::payload::HookPayload;
 use super::permission::{defer_to_terminal_reply, PermissionBroker};
-use super::sessions::state_after;
+use super::tracker::SessionTracker;
 use crate::core::activity::Activity;
 use crate::core::source::SourceContext;
 
@@ -17,11 +17,12 @@ const PERMISSION_TIMEOUT: Duration = Duration::from_secs(590);
 pub struct HookService {
     ctx: SourceContext,
     broker: Arc<PermissionBroker>,
+    sessions: Arc<SessionTracker>,
 }
 
 impl HookService {
-    pub fn new(ctx: SourceContext, broker: Arc<PermissionBroker>) -> Self {
-        Self { ctx, broker }
+    pub fn new(ctx: SourceContext, broker: Arc<PermissionBroker>, sessions: Arc<SessionTracker>) -> Self {
+        Self { ctx, broker, sessions }
     }
 
     pub async fn handle(&self, event: &str, body: &[u8]) -> Value {
@@ -34,12 +35,9 @@ impl HookService {
     }
 
     fn track_session(&self, event: &str, payload: &HookPayload) {
-        let Some(state) = state_after(event, payload) else {
-            return;
-        };
-        let project = payload.project_name();
-        let activity = session_activity(&self.ctx, payload.session_id(), project.as_deref(), &state);
-        self.ctx.upsert(activity);
+        if let Some(change) = self.sessions.record_event(event, payload, Instant::now()) {
+            apply_change(&self.ctx, &change);
+        }
     }
 
     async fn await_permission(&self, payload: &HookPayload) -> Value {

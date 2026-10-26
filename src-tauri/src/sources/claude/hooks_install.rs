@@ -7,13 +7,14 @@ use serde_json::{json, Map, Value};
 use super::server::TOKEN_HEADER;
 use crate::core::error::{AppError, AppResult};
 
-pub const HOOK_EVENTS: [&str; 7] = [
+pub const HOOK_EVENTS: [&str; 8] = [
     "SessionStart",
     "UserPromptSubmit",
     "PreToolUse",
     "PostToolUse",
     "Notification",
     "Stop",
+    "SessionEnd",
     "PermissionRequest",
 ];
 const PERMISSION_EVENT: &str = "PermissionRequest";
@@ -259,6 +260,19 @@ mod tests {
         assert_eq!(settings["hooks"]["Stop"].as_array().unwrap().len(), 1);
         assert_eq!(settings["hooks"]["PreToolUse"].as_array().unwrap().len(), 2);
         assert!(settings["hooks"]["Stop"][0]["hooks"][0]["command"].as_str().unwrap().contains(":50000/"));
+    }
+
+    #[test]
+    fn upgrading_an_older_install_adds_session_end_without_duplicates() {
+        let mut settings = user_settings();
+        merge_hooks(&mut settings, &endpoint()).unwrap();
+        settings["hooks"].as_object_mut().unwrap().remove("SessionEnd");
+        assert_eq!(installed_events(&settings).len(), HOOK_EVENTS.len() - 1);
+        merge_hooks(&mut settings, &endpoint()).unwrap();
+        assert_eq!(installed_events(&settings).len(), HOOK_EVENTS.len());
+        assert_eq!(settings["hooks"]["SessionEnd"].as_array().unwrap().len(), 1);
+        assert_eq!(settings["hooks"]["Stop"].as_array().unwrap().len(), 1);
+        assert_eq!(settings["hooks"]["PreToolUse"].as_array().unwrap().len(), 2);
     }
 
     #[test]

@@ -1,6 +1,6 @@
 export interface SessionView {
   view: "session";
-  state: "started" | "thinking" | "tool" | "waiting" | "done";
+  state: "started" | "thinking" | "tool" | "waiting" | "done" | "interrupted" | "idle";
   project: string | null;
   statusLine: string;
   tool: string | null;

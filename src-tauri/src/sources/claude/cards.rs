@@ -2,20 +2,33 @@ use serde_json::json;
 
 use super::payload::{preview_tool_input, summarize_tool_input, HookPayload};
 use super::sessions::SessionState;
+use super::tracker::CardChange;
 use crate::core::activity::{ActionSpec, ActionStyle, Activity, ActivityKind, CompactView, Priority};
 use crate::core::source::SourceContext;
 
 const CLAUDE_ACCENT: &str = "#d97757";
 const DONE_ACCENT: &str = "#22c55e";
-const ACTIVE_SESSION_TTL_MS: u64 = 15 * 60 * 1000;
+const ACTIVE_SESSION_TTL_MS: u64 = 12 * 60 * 60 * 1000;
 const DONE_TTL_MS: u64 = 8_000;
+const FOLLOW_UP_TTL_MS: u64 = 15_000;
+const INTERRUPTED_ACCENT: &str = "#f59e0b";
+pub const DISMISS_ACTION: &str = "dismiss";
 
 struct StatusLine {
     label: &'static str,
     text: String,
 }
 
-pub fn session_activity(
+pub fn apply_change(ctx: &SourceContext, change: &CardChange) {
+    match change {
+        CardChange::Show { session_id, project, state } => {
+            ctx.upsert(session_activity(ctx, session_id, project.as_deref(), state));
+        }
+        CardChange::Remove { session_id } => ctx.remove(session_id),
+    }
+}
+
+fn session_activity(
     ctx: &SourceContext,
     session_id: &str,
     project: Option<&str>,
@@ -36,7 +49,8 @@ pub fn session_activity(
     let activity = ctx
         .activity(session_id, ActivityKind::Claude, compact)
         .expanded(expanded)
-        .ttl_ms(ttl_for(state));
+        .ttl_ms(ttl_for(state))
+        .action(ActionSpec::button(DISMISS_ACTION, "Dismiss"));
     prioritized(activity, state)
 }
 
@@ -69,7 +83,10 @@ fn status_line(state: &SessionState) -> StatusLine {
         }
         SessionState::RunningTool { tool, detail } => ("tool", format!("{tool} · {detail}")),
         SessionState::WaitingForInput { message } => ("waiting", message.clone()),
+        SessionState::AwaitingFollowUp { message } => ("waiting", message.clone()),
         SessionState::Done => ("done", "Done".to_owned()),
+        SessionState::Interrupted => ("interrupted", "Interrupted".to_owned()),
+        SessionState::Idle => ("idle", "Idle".to_owned()),
     };
     StatusLine { label, text }
 }
@@ -84,13 +101,15 @@ fn tool_of(state: &SessionState) -> Option<&str> {
 fn accent_for(state: &SessionState) -> &'static str {
     match state {
         SessionState::Done => DONE_ACCENT,
+        SessionState::Interrupted => INTERRUPTED_ACCENT,
         _ => CLAUDE_ACCENT,
     }
 }
 
 fn ttl_for(state: &SessionState) -> u64 {
     match state {
-        SessionState::Done => DONE_TTL_MS,
+        SessionState::Done | SessionState::Interrupted | SessionState::Idle => DONE_TTL_MS,
+        SessionState::AwaitingFollowUp { .. } => FOLLOW_UP_TTL_MS,
         _ => ACTIVE_SESSION_TTL_MS,
     }
 }
@@ -98,7 +117,37 @@ fn ttl_for(state: &SessionState) -> u64 {
 fn prioritized(activity: Activity, state: &SessionState) -> Activity {
     match state {
         SessionState::WaitingForInput { .. } => activity.priority(Priority::High).alert(true),
-        SessionState::Done => activity.priority(Priority::High),
+        SessionState::Done | SessionState::Interrupted => activity.priority(Priority::High),
         _ => activity,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn in_flight_states_outlive_a_long_tool_run() {
+        let one_hour_ms = 60 * 60 * 1000;
+        let waiting = SessionState::WaitingForInput { message: String::new() };
+        for state in [SessionState::Started, SessionState::Thinking, waiting] {
+            assert!(ttl_for(&state) > one_hour_ms);
+        }
+    }
+
+    #[test]
+    fn finished_cards_expire_quickly() {
+        let follow_up = SessionState::AwaitingFollowUp { message: String::new() };
+        let finished = [SessionState::Done, SessionState::Interrupted, SessionState::Idle, follow_up];
+        for state in finished {
+            assert!(ttl_for(&state) < 60_000);
+        }
+    }
+
+    #[test]
+    fn interrupted_and_idle_are_labelled_distinctly_from_thinking() {
+        assert_eq!(status_line(&SessionState::Interrupted).label, "interrupted");
+        assert_eq!(status_line(&SessionState::Idle).label, "idle");
+        assert_ne!(status_line(&SessionState::Idle).label, status_line(&SessionState::Thinking).label);
     }
 }

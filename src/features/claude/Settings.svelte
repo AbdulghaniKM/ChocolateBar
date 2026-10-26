@@ -41,7 +41,7 @@
     {#if report}
       <p class="text-xs break-all text-island-muted">{report.hooks.settingsPath}</p>
       <p class="text-xs text-island-muted">
-        {report.hooks.events.length} of 7 events active{report.hooks.backupExists
+        {report.hooks.events.length} of 8 events active{report.hooks.backupExists
           ? " · backup saved as settings.json.chocolatebar.bak"
           : ""}
       </p>

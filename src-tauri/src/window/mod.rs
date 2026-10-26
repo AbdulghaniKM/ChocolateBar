@@ -23,28 +23,46 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
         .get_webview_window(MAIN_LABEL)
         .ok_or(AppError::Missing("main window"))?;
     let hwnd = native::capture(&window)?;
-    styles::apply(hwnd);
+    show_as_overlay(&window)?;
     placement::place(hwnd);
     subclass::install(hwnd)?;
-    window.set_ignore_cursor_events(true)?;
     replace_on_scale_change(&window);
     start_watchers(app, window);
-    styles::show_without_activation(hwnd);
     Ok(())
 }
 
+fn show_as_overlay(window: &WebviewWindow) -> AppResult<()> {
+    window.show()?;
+    restyle_island();
+    Ok(())
+}
+
+fn restyle_island() {
+    let hwnd = native::island();
+    styles::apply(hwnd);
+    styles::set_click_through(hwnd, true);
+}
+
 pub fn apply_visibility(app: &AppHandle, visible: bool) {
+    let Some(window) = app.get_webview_window(MAIN_LABEL) else {
+        return;
+    };
     let result = app.run_on_main_thread(move || {
-        let hwnd = native::island();
-        if visible {
-            styles::show_without_activation(hwnd);
-        } else {
-            styles::hide(hwnd);
+        if let Err(error) = change_visibility(&window, visible) {
+            log::warn!("visibility change failed: {error}");
         }
     });
     if let Err(error) = result {
         log::warn!("visibility change failed: {error}");
     }
+}
+
+fn change_visibility(window: &WebviewWindow, visible: bool) -> AppResult<()> {
+    if visible {
+        return show_as_overlay(window);
+    }
+    window.hide()?;
+    Ok(())
 }
 
 fn replace_on_scale_change(window: &WebviewWindow) {

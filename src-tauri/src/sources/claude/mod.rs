@@ -7,6 +7,8 @@ mod server;
 mod service;
 mod sessions;
 mod token;
+mod tracker;
+mod transcript;
 
 use std::time::Duration;
 
@@ -33,6 +35,7 @@ impl ActivitySource for ClaudeSource {
                 SourceEvent::Command(command) => runtime.handle_command(command),
                 SourceEvent::Idle => {}
             }
+            runtime.poll_sessions();
             if let Some(settings) = ctx.take_changed_settings() {
                 runtime.apply_settings(&settings);
             }

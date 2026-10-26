@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 
@@ -33,6 +33,10 @@ impl HookPayload {
 
     pub fn message(&self) -> Option<&str> {
         self.text("message")
+    }
+
+    pub fn transcript_path(&self) -> Option<PathBuf> {
+        self.text("transcript_path").map(PathBuf::from)
     }
 
     pub fn project_name(&self) -> Option<String> {
@@ -109,6 +113,13 @@ mod tests {
     fn previews_non_command_input_as_json() {
         let input = json!({ "pattern": "todo" });
         assert!(preview_tool_input(&input).contains("\"pattern\""));
+    }
+
+    #[test]
+    fn reads_the_transcript_path_when_present() {
+        let payload = HookPayload::parse(br#"{"transcript_path":"C:\\logs\\s.jsonl"}"#);
+        assert_eq!(payload.transcript_path(), Some(PathBuf::from(r"C:\logs\s.jsonl")));
+        assert_eq!(HookPayload::parse(b"{}").transcript_path(), None);
     }
 
     #[test]
