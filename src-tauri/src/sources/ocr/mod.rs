@@ -1,8 +1,6 @@
 mod capture;
 mod cards;
-mod clipboard;
 mod clipboard_watch;
-mod dib;
 mod recognize;
 mod session;
 

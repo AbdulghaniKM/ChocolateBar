@@ -185,6 +185,44 @@ impl Default for NetworkSettings {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum WindowLayout {
+    #[default]
+    None,
+    Maximize,
+    Left,
+    Right,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortcutApp {
+    pub app_id: String,
+    pub name: String,
+    #[serde(default)]
+    pub layout: WindowLayout,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShortcutGroup {
+    pub id: String,
+    pub name: String,
+    #[serde(default)]
+    pub apps: Vec<ShortcutApp>,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct ShortcutSettings {
+    pub groups: Vec<ShortcutGroup>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Settings {
@@ -199,6 +237,7 @@ pub struct Settings {
     pub weather: WeatherSettings,
     pub ocr: OcrSettings,
     pub network: NetworkSettings,
+    pub shortcuts: ShortcutSettings,
 }
 
 impl Settings {

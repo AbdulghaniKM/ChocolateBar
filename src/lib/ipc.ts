@@ -40,7 +40,9 @@ export const getSettings = () => invoke<Settings>("get_settings");
 export const updateSettings = (patch: SettingsPatch) =>
   invoke<Settings>("update_settings", { patch });
 
-export const openSettings = () => invoke<void>("open_settings");
+export const openSettings = (tab?: string) => invoke<void>("open_settings", { tab: tab ?? null });
+
+export const onSettingsTab = (handler: (tab: string) => void) => onEvent<string>("settings://tab", handler);
 
 const onEvent = <T>(event: string, handler: (payload: T) => void): Promise<UnlistenFn> =>
   listen<T>(event, (message) => handler(message.payload));

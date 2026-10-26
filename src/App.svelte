@@ -4,7 +4,7 @@
   import Island from "./shell/Island.svelte";
   import SettingsApp from "./shell/SettingsApp.svelte";
 
-  const showsSettings = location.hash === "#settings";
+  const showsSettings = location.hash.startsWith("#settings");
 
   onMount(() => {
     const stopListening = settingsState.start();

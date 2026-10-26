@@ -1,7 +1,9 @@
 pub mod activity;
 pub mod autostart;
+pub mod clipboard;
 pub mod com;
 pub mod commands;
+pub mod dib;
 pub mod error;
 pub mod events;
 pub mod hub;

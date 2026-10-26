@@ -7,7 +7,7 @@ export interface Size {
 }
 
 export const COMPACT_SIZE: Size = { width: 17, height: 2.5 };
-export const IDLE_SIZE: Size = { width: 22, height: 13 };
+export const HUB_SIZE: Size = { width: 28, height: 22 };
 const DEFAULT_CARD: Size = { width: 28, height: 20 };
 const CARD_SIZES: Partial<Record<ActivityKind, Size>> = {
   media: { width: 28, height: 23 },
@@ -17,7 +17,7 @@ const CARD_SIZES: Partial<Record<ActivityKind, Size>> = {
 };
 const WINDOW_GUTTER_REM = 1;
 
-export const LARGEST_CARD: Size = [DEFAULT_CARD, IDLE_SIZE, ...Object.values(CARD_SIZES)].reduce(
+export const LARGEST_CARD: Size = [DEFAULT_CARD, HUB_SIZE, ...Object.values(CARD_SIZES)].reduce(
   (largest, size) => ({
     width: Math.max(largest.width, size.width),
     height: Math.max(largest.height, size.height),
@@ -25,8 +25,8 @@ export const LARGEST_CARD: Size = [DEFAULT_CARD, IDLE_SIZE, ...Object.values(CAR
   COMPACT_SIZE,
 );
 
-export function cardSize(activity: Activity | null): Size {
-  if (!activity) return IDLE_SIZE;
+export function cardSize(activity: Activity | null, showingHub = false): Size {
+  if (!activity || showingHub) return HUB_SIZE;
   return CARD_SIZES[activity.kind] ?? DEFAULT_CARD;
 }
 

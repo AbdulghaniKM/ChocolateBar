@@ -4,7 +4,7 @@
 
 # ChocolateBar
 
-**A Dynamic Island for Windows.** A small pill that lives above your taskbar and opens into live cards for music, calls, timers, downloads, Claude Code and more.
+**A Dynamic Island for Windows.** A small pill that lives above your taskbar and opens into live cards for music, timers, downloads and Claude Code, plus one-tap app shortcuts and a clipboard history.
 
 [![Latest release](https://img.shields.io/github/v/release/AbdulghaniKM/ChocolateBar?style=flat-square&color=eaa660&labelColor=120d0b)](https://github.com/AbdulghaniKM/ChocolateBar/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/AbdulghaniKM/ChocolateBar/total?style=flat-square&color=74d3a9&labelColor=120d0b)](https://github.com/AbdulghaniKM/ChocolateBar/releases)
@@ -20,6 +20,17 @@ Grab **`ChocolateBar_x.y.z_x64-setup.exe`** from the [latest release](https://gi
 
 ChocolateBar **updates itself**. About 15 seconds after launch it installs any newer release, and while running it checks every 6 hours and offers new versions from the tray menu.
 
+## Shortcuts and clipboard
+
+Click the **grid button** on any card (or open the island when nothing is playing) to reach the hub.
+
+<div align="center">
+<img src="docs/showcase/hub.svg" width="900" alt="Tapping a Work shortcut opens Chrome on the left and Word on the right; the clipboard tab collects copied text, images and files" />
+</div>
+
+- **Shortcuts** open a whole setup with one tap: any combination of apps, as many groups as you like. Give each app a layout (left or right half, a quarter, or maximized) and its window snaps there once it opens. For example, **Gaming** opens Discord and Minecraft, and **Work** puts Chrome on the left and Word on the right. Pick from every app in your Start menu (desktop and Store apps), or paste a path to any `.exe`. Build them in Settings → **Shortcuts**.
+- **Clipboard** keeps the last 40 things you copied: text, images and files. Click one to copy it again, pin the ones you reuse, and clear the rest. Content that password managers mark as private is never recorded, and history lives in memory only, so it's gone when ChocolateBar quits.
+
 ## What it shows
 
 | Activity | In the island |
@@ -34,6 +45,7 @@ ChocolateBar **updates itself**. About 15 seconds after launch it installs any n
 | **Weather & sports** | Current conditions with rain and storm warnings, and live scores for the leagues and teams you follow. |
 | **Text capture** | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>, drag a box, and the recognized text lands on your clipboard. |
 | **File shelf** | Drop files on the island to park them, and drag them back out later. |
+| **Shortcuts & clipboard** | App groups that open and arrange themselves in one tap, plus a history of everything you copy. |
 | **Keyboard & network** | Input-language and Caps Lock changes, Wi-Fi and VPN events, and live up/down speed. |
 
 ## Using it
@@ -41,6 +53,7 @@ ChocolateBar **updates itself**. About 15 seconds after launch it installs any n
 - **Click** the pill to open it.
 - **Right-click**, press <kbd>Esc</kbd>, or use the chevron to close it. It also closes by itself shortly after the mouse leaves.
 - **Scroll** over the island, or use the arrows in the card header, to flip between activities.
+- The **grid button** opens the hub with your shortcuts, clipboard and clock.
 - Everywhere outside the island stays click-through, so it never blocks the window underneath.
 - It hides in fullscreen games and videos unless something critical comes in.
 

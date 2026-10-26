@@ -15,6 +15,8 @@ import {
 
 const COLLAPSE_DELAY_MS = 1500;
 
+export type HubTab = "shortcuts" | "clipboard" | "timer";
+
 export function sortByRank(activities: Activity[]): Activity[] {
   return [...activities].sort(
     (a, b) =>
@@ -29,6 +31,8 @@ class Island {
   focusedId = $state<string | null>(null);
   expanded = $state(false);
   hidden = $state(false);
+  showingHub = $state(false);
+  hubTab = $state<HubTab>("shortcuts");
   ordered = $derived(sortByRank([...this.activities.values()]));
   focused = $derived(this.focusedId ? (this.activities.get(this.focusedId) ?? null) : null);
   private collapseTimer: ReturnType<typeof setTimeout> | undefined;
@@ -51,7 +55,18 @@ class Island {
   setExpanded(expanded: boolean) {
     this.cancelCollapse();
     this.expanded = expanded;
+    if (!expanded) this.showingHub = false;
     void setExpanded(expanded);
+  }
+
+  openHub(tab?: HubTab) {
+    if (tab) this.hubTab = tab;
+    this.showingHub = true;
+    if (!this.expanded) this.setExpanded(true);
+  }
+
+  closeHub() {
+    this.showingHub = false;
   }
 
   toggleExpanded() {

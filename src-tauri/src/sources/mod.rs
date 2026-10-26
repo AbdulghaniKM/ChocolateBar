@@ -2,9 +2,11 @@ pub mod battery;
 pub mod bluetooth;
 pub mod buds;
 pub mod claude;
+pub mod clipboard;
 pub mod download;
 pub mod game;
 pub mod keyboard;
+pub mod launcher;
 pub mod media;
 pub mod network;
 pub mod notification;
@@ -46,6 +48,8 @@ pub fn all_sources() -> Vec<SourceFactory> {
         build::<timer::TimerSource>,
         build::<weather::WeatherSource>,
         build::<game::GameSource>,
+        build::<clipboard::ClipboardSource>,
+        build::<launcher::LauncherSource>,
     ]
 }
 
@@ -68,8 +72,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn registers_eighteen_uniquely_named_sources() {
+    fn registers_twenty_uniquely_named_sources() {
         let names: HashSet<&str> = all_sources().iter().map(|build| build().name()).collect();
-        assert_eq!(names.len(), 18);
+        assert_eq!(names.len(), 20);
     }
 }

@@ -74,8 +74,8 @@ pub fn update_settings(
 }
 
 #[tauri::command]
-pub async fn open_settings(app: AppHandle) -> AppResult<()> {
-    settings_window::open(&app)
+pub async fn open_settings(app: AppHandle, tab: Option<String>) -> AppResult<()> {
+    settings_window::open(&app, tab.as_deref())
 }
 
 async fn await_reply(receiver: oneshot::Receiver<CommandReply>) -> AppResult<Value> {

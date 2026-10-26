@@ -3,7 +3,7 @@ use windows::Graphics::Imaging::{BitmapPixelFormat, SoftwareBitmap};
 use windows::Media::Ocr::OcrEngine;
 use windows::Storage::Streams::DataWriter;
 
-use super::dib::{fit_within, BgraImage};
+use crate::core::dib::{fit_within, BgraImage};
 
 pub const AUTO_LANGUAGE: &str = "auto";
 

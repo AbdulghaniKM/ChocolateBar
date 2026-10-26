@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="400" viewBox="0 0 900 400" font-family="'Segoe UI Variable Text','Segoe UI',Inter,system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif">
+  <title>The hub: one tap on a shortcut opens Chrome and Word side by side, and the clipboard collects everything you copy</title>
+  <defs>
+    <linearGradient id="hubBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b1411"/>
+      <stop offset="1" stop-color="#110c0a"/>
+    </linearGradient>
+    <linearGradient id="hubWall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b4a5c"/>
+      <stop offset="1" stop-color="#2a2226"/>
+    </linearGradient>
+    <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#93acff"/>
+      <stop offset="1" stop-color="#c7a1ff"/>
+    </linearGradient>
+    <clipPath id="hubCard"><rect x="30" y="84" width="440" height="276" rx="20"/></clipPath>
+    <filter id="hubShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <rect width="900" height="400" rx="20" fill="url(#hubBg)"/>
+
+  <rect x="30" y="30" width="440" height="340" rx="28" fill="#120d0b" stroke="#ffecdc" stroke-opacity="0.08" filter="url(#hubShadow)"/>
+  <rect x="52" y="44" width="262" height="32" rx="16" fill="#1f1714"/>
+  <rect x="56" y="48" width="98" height="24" rx="12" fill="#f8efe6"><animate attributeName="x" values="56;56;156;156;56" keyTimes="0;0.45;0.485;0.96;1" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1"/></rect>
+  <g font-size="12" font-weight="600" text-anchor="middle">
+    <text x="105" y="64" fill="#120d0b">Shortcuts<animate attributeName="fill" values="#120d0b;#120d0b;#bba99c;#bba99c;#120d0b" keyTimes="0;0.45;0.47;0.97;1" dur="10s" repeatCount="indefinite"/></text>
+    <text x="205" y="64" fill="#bba99c">Clipboard<animate attributeName="fill" values="#bba99c;#bba99c;#120d0b;#120d0b;#bba99c" keyTimes="0;0.46;0.48;0.96;1" dur="10s" repeatCount="indefinite"/></text>
+    <text x="283" y="64" fill="#bba99c">Clock</text>
+  </g>
+  <path d="M422 56l5 5 5-5" fill="none" stroke="#bba99c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g clip-path="url(#hubCard)"><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.48;0.97;1" dur="10s" repeatCount="indefinite"/>
+    <rect x="52" y="96" width="194" height="100" rx="16" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/>
+    <rect x="52" y="96" width="194" height="100" rx="16" fill="#eaa660" fill-opacity="0" stroke="#eaa660" stroke-opacity="0.6"><animate attributeName="fill-opacity" values="0;0;0.18;0.18;0;0" keyTimes="0;0.09;0.1;0.13;0.16;1" dur="10s" repeatCount="indefinite"/></rect>
+    <rect x="66" y="110" width="28" height="28" rx="8" fill="hsl(200 45% 26%)" stroke="#120d0b" stroke-width="2"/><text x="80" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(200 80% 82%)">GC</text><rect x="88" y="110" width="28" height="28" rx="8" fill="hsl(230 45% 26%)" stroke="#120d0b" stroke-width="2"/><text x="102" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(230 80% 82%)">W</text>
+    <g opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.1;0.11;0.27;0.28;1" dur="10s" repeatCount="indefinite"/>
+      <circle cx="226" cy="124" r="7" fill="none" stroke="#eaa660" stroke-width="2" stroke-dasharray="30 14" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 226 124" to="360 226 124" dur="0.9s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    <text x="66" y="166" font-size="14" font-weight="600" fill="#f8efe6">Work</text>
+    <text x="66" y="184" font-size="11" fill="#bba99c">2 apps</text>
+    <rect x="110" y="176" width="14" height="10" rx="2" fill="none" stroke="#eaa660" stroke-opacity="0.5"/><rect x="111.5" y="177.5" width="5" height="7" rx="1" fill="#eaa660"/><rect x="128" y="176" width="14" height="10" rx="2" fill="none" stroke="#eaa660" stroke-opacity="0.5"/><rect x="135.5" y="177.5" width="5" height="7" rx="1" fill="#eaa660"/>
+
+    <rect x="254" y="96" width="194" height="100" rx="16" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/>
+    <rect x="268" y="110" width="28" height="28" rx="8" fill="hsl(265 45% 26%)" stroke="#120d0b" stroke-width="2"/><text x="282" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(265 80% 82%)">D</text><rect x="290" y="110" width="28" height="28" rx="8" fill="hsl(150 45% 26%)" stroke="#120d0b" stroke-width="2"/><text x="304" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="hsl(150 80% 82%)">MD</text>
+    <text x="268" y="166" font-size="14" font-weight="600" fill="#f8efe6">Gaming</text>
+    <text x="268" y="184" font-size="11" fill="#bba99c">2 apps</text>
+    <rect x="312" y="176" width="14" height="10" rx="2" fill="none" stroke="#eaa660" stroke-opacity="0.5"/><rect x="313.5" y="177.5" width="11" height="7" rx="1" fill="#eaa660"/>
+
+    <rect x="52" y="204" width="194" height="70" rx="16" fill="none" stroke="#3a2c25" stroke-dasharray="4 4"/>
+    <text x="149" y="244" text-anchor="middle" font-size="12" fill="#bba99c">+ New or edit</text>
+  </g>
+
+  <g opacity="0" clip-path="url(#hubCard)"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.48;0.51;0.94;0.97;1" dur="10s" repeatCount="indefinite"/>
+    <g opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.615;0.65;0.94;0.97;1" dur="10s" repeatCount="indefinite"/>
+      <rect x="52" y="96" width="396" height="50" rx="14" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/><text x="66" y="117" font-size="13" fill="#f8efe6">Meeting notes: ship v0.2 on Friday,</text><text x="66" y="134" font-size="13" fill="#f8efe6">then update the README showcase</text><text x="434" y="112" text-anchor="end" font-size="10" fill="#8a786c">now</text>
+    </g>
+    <g><animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 58;0 58;0 0" keyTimes="0;0.6;0.64;0.97;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0 0 1 1" dur="10s" repeatCount="indefinite"/>
+      <rect x="52" y="96" width="396" height="50" rx="14" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/><rect x="62" y="104" width="64" height="34" rx="7" fill="url(#thumb)"/><text x="138" y="125" font-size="12" fill="#bba99c">Image · 1920×1080</text><text x="434" y="112" text-anchor="end" font-size="10" fill="#8a786c">2m</text><g opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.76;0.775;0.89;0.91;1" dur="10s" repeatCount="indefinite"/><rect x="356" y="102" width="70" height="18" rx="9" fill="#74d3a9" fill-opacity="0.15"/><text x="391" y="115" text-anchor="middle" font-size="10" font-weight="600" fill="#74d3a9">Copied</text></g>
+      <rect x="52" y="154" width="396" height="50" rx="14" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/><rect x="62" y="162" width="34" height="34" rx="8" fill="#1f1714"/><path d="M73 170h8l5 5v13h-13z" fill="none" stroke="#eaa660" stroke-width="1.6" stroke-linejoin="round"/><text x="108" y="176" font-size="13" font-weight="600" fill="#f8efe6">report.docx</text><text x="108" y="191" font-size="11" fill="#bba99c">C:\Users\you\Documents</text><text x="434" y="170" text-anchor="end" font-size="10" fill="#8a786c">9m</text>
+      <rect x="52" y="212" width="396" height="50" rx="14" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/><text x="66" y="241" font-size="13" fill="#f8efe6">https://github.com/AbdulghaniKM/ChocolateBar</text><text x="434" y="228" text-anchor="end" font-size="10" fill="#8a786c">32m</text>
+      <rect x="52" y="270" width="396" height="50" rx="14" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/><text x="66" y="299" font-size="13" fill="#f8efe6">npm run build &amp;&amp; npm run preview</text><text x="434" y="286" text-anchor="end" font-size="10" fill="#8a786c">1h</text>
+    </g>
+  </g>
+
+  <rect x="500" y="40" width="370" height="244" rx="12" fill="url(#hubWall)" stroke="#3a2c25"/>
+  <rect x="500" y="268" width="370" height="16" fill="#0f2b2b"/>
+  <g opacity="0.85">
+    <rect x="660" y="272" width="8" height="8" rx="2" fill="#3aa0e0"/><rect x="674" y="272" width="8" height="8" rx="4" fill="#4285f4"/>
+    <rect x="688" y="272" width="8" height="8" rx="2" fill="#2b579a"/><rect x="702" y="272" width="8" height="8" rx="2" fill="#5865f2"/>
+  </g>
+  <g opacity="0"><animate attributeName="opacity" values="0;0;1;1;1;0;0" keyTimes="0;0.13;0.165;0.205;0.93;0.97;1" dur="10s" repeatCount="indefinite"/><g><animateTransform attributeName="transform" type="translate" values="585 90;585 90;585 90;500 40;500 40;500 40;585 90" keyTimes="0;0.13;0.165;0.205;0.93;0.97;1" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1;0 0 1 1;0 0 1 1" additive="sum"/><g><animateTransform attributeName="transform" type="scale" values="0.6667 0.6542;0.6667 0.6542;0.6667 0.6542;1.0278 1.0654;1.0278 1.0654;1.0278 1.0654;0.6667 0.6542" keyTimes="0;0.13;0.165;0.205;0.93;0.97;1" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1;0 0 1 1;0 0 1 1" additive="sum"/><rect x="1" y="1" width="178" height="212" rx="6" fill="#f3ede8" stroke="#000" stroke-opacity="0.25"/><rect x="1" y="1" width="178" height="22" rx="6" fill="#4285f4"/><rect x="1" y="14" width="178" height="9" fill="#4285f4"/><text x="10" y="16" font-size="10" font-weight="600" fill="#fff">Google Chrome</text><rect x="14" y="38" width="110" height="7" rx="3.5" fill="#c9bfb7"/><rect x="14" y="54" width="150" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="66" width="140" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="78" width="120" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="98" width="152" height="60" rx="5" fill="#e6ded7"/></g></g></g>
+  <g opacity="0"><animate attributeName="opacity" values="0;0;1;1;1;0;0" keyTimes="0;0.21;0.245;0.285;0.93;0.97;1" dur="10s" repeatCount="indefinite"/><g><animateTransform attributeName="transform" type="translate" values="665 100;665 100;665 100;685 40;685 40;685 40;665 100" keyTimes="0;0.21;0.245;0.285;0.93;0.97;1" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1;0 0 1 1;0 0 1 1" additive="sum"/><g><animateTransform attributeName="transform" type="scale" values="0.6667 0.6542;0.6667 0.6542;0.6667 0.6542;1.0278 1.0654;1.0278 1.0654;1.0278 1.0654;0.6667 0.6542" keyTimes="0;0.21;0.245;0.285;0.93;0.97;1" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0 0 1 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1;0 0 1 1;0 0 1 1" additive="sum"/><rect x="1" y="1" width="178" height="212" rx="6" fill="#f3ede8" stroke="#000" stroke-opacity="0.25"/><rect x="1" y="1" width="178" height="22" rx="6" fill="#2b579a"/><rect x="1" y="14" width="178" height="9" fill="#2b579a"/><text x="10" y="16" font-size="10" font-weight="600" fill="#fff">Word</text><rect x="14" y="38" width="110" height="7" rx="3.5" fill="#c9bfb7"/><rect x="14" y="54" width="150" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="66" width="140" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="78" width="120" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="98" width="152" height="60" rx="5" fill="#e6ded7"/></g></g></g>
+  <text x="685" y="320" text-anchor="middle" font-size="12" fill="#8a786c">One tap opens every app and snaps each window into place</text>
+</svg>

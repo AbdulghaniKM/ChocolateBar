@@ -13,7 +13,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     WINDOW_STYLE, WM_CLIPBOARDUPDATE, WNDCLASSEXW,
 };
 
-use super::clipboard;
+use crate::core::clipboard;
 
 const WAKE_INTERVAL_MS: u32 = 200;
 

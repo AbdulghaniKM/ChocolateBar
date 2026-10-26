@@ -9,6 +9,7 @@ import Gamepad2 from "@lucide/svelte/icons/gamepad-2";
 import Headphones from "@lucide/svelte/icons/headphones";
 import Keyboard from "@lucide/svelte/icons/keyboard";
 import Paperclip from "@lucide/svelte/icons/paperclip";
+import Rocket from "@lucide/svelte/icons/rocket";
 import ScanText from "@lucide/svelte/icons/scan-text";
 import ShieldCheck from "@lucide/svelte/icons/shield-check";
 import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
@@ -20,9 +21,14 @@ import Wifi from "@lucide/svelte/icons/wifi";
 import type { ActivityKind } from "../../lib/contracts";
 
 export const GENERAL_TAB = "general";
+export const SHORTCUTS_TAB = "shortcuts";
 
-export const TAB_META: Record<ActivityKind | typeof GENERAL_TAB, { label: string; icon: Component<{ class?: string }> }> = {
+export const TAB_META: Record<
+  ActivityKind | typeof GENERAL_TAB | typeof SHORTCUTS_TAB,
+  { label: string; icon: Component<{ class?: string }> }
+> = {
   general: { label: "General", icon: SlidersHorizontal },
+  shortcuts: { label: "Shortcuts", icon: Rocket },
   media: { label: "Media", icon: EighthNotes },
   osd: { label: "Volume & brightness", icon: Volume2 },
   privacy: { label: "Privacy", icon: ShieldCheck },

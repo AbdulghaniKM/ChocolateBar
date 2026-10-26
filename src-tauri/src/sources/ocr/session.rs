@@ -2,8 +2,8 @@ use serde_json::{json, Value};
 
 use super::capture::{open_screen_clip, ArmedWindow};
 use super::cards::{message_activity, recognized_activity};
-use super::clipboard;
-use super::dib::bgra_from_dib;
+use crate::core::clipboard;
+use crate::core::dib::bgra_from_dib;
 use super::recognize::{available_language_tags, recognize_text};
 use crate::core::activity::{ActionRequest, SourceCommand};
 use crate::core::source::SourceContext;

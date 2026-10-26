@@ -300,6 +300,144 @@ def positions():
 """
 
 
+def hub():
+    dur = 10
+    info, raspberry, berry = "#93acff", "#ff7a85", "#c7a1ff"
+
+    def at(*seconds):
+        return kt(*(second / dur for second in seconds))
+
+    def loop(attribute, values, times, extra=""):
+        return f'<animate attributeName="{attribute}" values="{values}" keyTimes="{times}" dur="{dur}s" repeatCount="indefinite"{extra}/>'
+
+    def avatar(x, y, letters, hue):
+        return (f'<rect x="{x}" y="{y}" width="28" height="28" rx="8" fill="hsl({hue} 45% 26%)" stroke="{ISLAND}" stroke-width="2"/>'
+                f'<text x="{x + 14}" y="{y + 18}" text-anchor="middle" font-size="10" font-weight="700" fill="hsl({hue} 80% 82%)">{letters}</text>')
+
+    def glyph(x, y, area):
+        frame = f'<rect x="{x}" y="{y}" width="14" height="10" rx="2" fill="none" stroke="{ACCENT}" stroke-opacity="0.5"/>'
+        ax, ay, aw, ah = area
+        return frame + f'<rect x="{x + ax}" y="{y + ay}" width="{aw}" height="{ah}" rx="1" fill="{ACCENT}"/>'
+
+    def window(name, color, floating, snapped, appear):
+        fx, fy, fw, fh = floating
+        sx, sy, sw, sh = snapped
+        times = at(0, appear, appear + 0.35, appear + 0.75, 9.3, 9.7, 10)
+        splines = f' calcMode="spline" keySplines="{LINEAR};{LINEAR};{EASE};{LINEAR};{LINEAR};{LINEAR}" additive="sum"'
+
+        def transform(kind, a, b):
+            values = f"{a};{a};{a};{b};{b};{b};{a}"
+            return (f'<animateTransform attributeName="transform" type="{kind}" values="{values}" keyTimes="{times}" '
+                    f'dur="{dur}s" repeatCount="indefinite"{splines}/>')
+
+        floating_scale = f"{fw / 180:.4f} {fh / 214:.4f}"
+        snapped_scale = f"{sw / 180:.4f} {sh / 214:.4f}"
+        return (
+            f'<g opacity="0">{loop("opacity", "0;0;1;1;1;0;0", times)}'
+            f'<g>{transform("translate", f"{fx} {fy}", f"{sx} {sy}")}'
+            f'<g>{transform("scale", floating_scale, snapped_scale)}'
+            f'<rect x="1" y="1" width="178" height="212" rx="6" fill="#f3ede8" stroke="#000" stroke-opacity="0.25"/>'
+            f'<rect x="1" y="1" width="178" height="22" rx="6" fill="{color}"/><rect x="1" y="14" width="178" height="9" fill="{color}"/>'
+            f'<text x="10" y="16" font-size="10" font-weight="600" fill="#fff">{name}</text>'
+            f'<rect x="14" y="38" width="110" height="7" rx="3.5" fill="#c9bfb7"/><rect x="14" y="54" width="150" height="5" rx="2.5" fill="#ddd4cd"/>'
+            f'<rect x="14" y="66" width="140" height="5" rx="2.5" fill="#ddd4cd"/><rect x="14" y="78" width="120" height="5" rx="2.5" fill="#ddd4cd"/>'
+            f'<rect x="14" y="98" width="152" height="60" rx="5" fill="#e6ded7"/>'
+            f'</g></g></g>'
+        )
+
+    shortcuts_opacity = loop("opacity", "1;1;0;0;1", at(0, 4.5, 4.8, 9.7, 10))
+    clipboard_opacity = loop("opacity", "0;0;1;1;0;0", at(0, 4.8, 5.1, 9.4, 9.7, 10))
+    tab_x = loop("x", "56;56;156;156;56", at(0, 4.5, 4.85, 9.6, 10), f' calcMode="spline" keySplines="{LINEAR};{EASE};{LINEAR};{EASE}"')
+    pressed = loop("fill-opacity", "0;0;0.18;0.18;0;0", at(0, 0.9, 1.0, 1.3, 1.6, 10))
+    spinner = loop("opacity", "0;0;1;1;0;0", at(0, 1.0, 1.1, 2.7, 2.8, 10))
+    push_down = (f'<animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 58;0 58;0 0" '
+                 f'keyTimes="{at(0, 6.0, 6.4, 9.7, 10)}" calcMode="spline" keySplines="{LINEAR};{EASE};{LINEAR};{LINEAR}" dur="{dur}s" repeatCount="indefinite"/>')
+    new_entry = loop("opacity", "0;0;1;1;0;0", at(0, 6.15, 6.5, 9.4, 9.7, 10))
+    copied = loop("opacity", "0;0;1;1;0;0", at(0, 7.6, 7.75, 8.9, 9.1, 10))
+
+    def clip_row(y, body):
+        return f'<rect x="52" y="{y}" width="396" height="50" rx="14" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/>{body}'
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="900" height="400" viewBox="0 0 900 400" font-family="{FONT}">
+  <title>The hub: one tap on a shortcut opens Chrome and Word side by side, and the clipboard collects everything you copy</title>
+  <defs>
+    <linearGradient id="hubBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b1411"/>
+      <stop offset="1" stop-color="#110c0a"/>
+    </linearGradient>
+    <linearGradient id="hubWall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b4a5c"/>
+      <stop offset="1" stop-color="#2a2226"/>
+    </linearGradient>
+    <linearGradient id="thumb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#93acff"/>
+      <stop offset="1" stop-color="#c7a1ff"/>
+    </linearGradient>
+    <clipPath id="hubCard"><rect x="30" y="84" width="440" height="276" rx="20"/></clipPath>
+    <filter id="hubShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <rect width="900" height="400" rx="20" fill="url(#hubBg)"/>
+
+  <rect x="30" y="30" width="440" height="340" rx="28" fill="{ISLAND}" stroke="#ffecdc" stroke-opacity="0.08" filter="url(#hubShadow)"/>
+  <rect x="52" y="44" width="262" height="32" rx="16" fill="{RAISED}"/>
+  <rect x="56" y="48" width="98" height="24" rx="12" fill="{TEXT}">{tab_x}</rect>
+  <g font-size="12" font-weight="600" text-anchor="middle">
+    <text x="105" y="64" fill="{ISLAND}">Shortcuts{loop("fill", f"{ISLAND};{ISLAND};{MUTED};{MUTED};{ISLAND}", at(0, 4.5, 4.7, 9.7, 10))}</text>
+    <text x="205" y="64" fill="{MUTED}">Clipboard{loop("fill", f"{MUTED};{MUTED};{ISLAND};{ISLAND};{MUTED}", at(0, 4.6, 4.8, 9.6, 10))}</text>
+    <text x="283" y="64" fill="{MUTED}">Clock</text>
+  </g>
+  <path d="M422 56l5 5 5-5" fill="none" stroke="{MUTED}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g clip-path="url(#hubCard)">{shortcuts_opacity}
+    <rect x="52" y="96" width="194" height="100" rx="16" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/>
+    <rect x="52" y="96" width="194" height="100" rx="16" fill="{ACCENT}" fill-opacity="0" stroke="{ACCENT}" stroke-opacity="0.6">{pressed}</rect>
+    {avatar(66, 110, "GC", 200)}{avatar(88, 110, "W", 230)}
+    <g opacity="0">{spinner}
+      <circle cx="226" cy="124" r="7" fill="none" stroke="{ACCENT}" stroke-width="2" stroke-dasharray="30 14" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" from="0 226 124" to="360 226 124" dur="0.9s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    <text x="66" y="166" font-size="14" font-weight="600" fill="{TEXT}">Work</text>
+    <text x="66" y="184" font-size="11" fill="{MUTED}">2 apps</text>
+    {glyph(110, 176, (1.5, 1.5, 5, 7))}{glyph(128, 176, (7.5, 1.5, 5, 7))}
+
+    <rect x="254" y="96" width="194" height="100" rx="16" fill="#ffecdc" fill-opacity="0.045" stroke="#ffecdc" stroke-opacity="0.07"/>
+    {avatar(268, 110, "D", 265)}{avatar(290, 110, "MD", 150)}
+    <text x="268" y="166" font-size="14" font-weight="600" fill="{TEXT}">Gaming</text>
+    <text x="268" y="184" font-size="11" fill="{MUTED}">2 apps</text>
+    {glyph(312, 176, (1.5, 1.5, 11, 7))}
+
+    <rect x="52" y="204" width="194" height="70" rx="16" fill="none" stroke="{BORDER}" stroke-dasharray="4 4"/>
+    <text x="149" y="244" text-anchor="middle" font-size="12" fill="{MUTED}">+ New or edit</text>
+  </g>
+
+  <g opacity="0" clip-path="url(#hubCard)">{clipboard_opacity}
+    <g opacity="0">{new_entry}
+      {clip_row(96, f'<text x="66" y="117" font-size="13" fill="{TEXT}">Meeting notes: ship v0.2 on Friday,</text><text x="66" y="134" font-size="13" fill="{TEXT}">then update the README showcase</text><text x="434" y="112" text-anchor="end" font-size="10" fill="{SUBTLE}">now</text>')}
+    </g>
+    <g>{push_down}
+      {clip_row(96, f'<rect x="62" y="104" width="64" height="34" rx="7" fill="url(#thumb)"/><text x="138" y="125" font-size="12" fill="{MUTED}">Image · 1920×1080</text><text x="434" y="112" text-anchor="end" font-size="10" fill="{SUBTLE}">2m</text><g opacity="0">{copied}<rect x="356" y="102" width="70" height="18" rx="9" fill="{SUCCESS}" fill-opacity="0.15"/><text x="391" y="115" text-anchor="middle" font-size="10" font-weight="600" fill="{SUCCESS}">Copied</text></g>')}
+      {clip_row(154, f'<rect x="62" y="162" width="34" height="34" rx="8" fill="{RAISED}"/><path d="M73 170h8l5 5v13h-13z" fill="none" stroke="{ACCENT}" stroke-width="1.6" stroke-linejoin="round"/><text x="108" y="176" font-size="13" font-weight="600" fill="{TEXT}">report.docx</text><text x="108" y="191" font-size="11" fill="{MUTED}">C:\\Users\\you\\Documents</text><text x="434" y="170" text-anchor="end" font-size="10" fill="{SUBTLE}">9m</text>')}
+      {clip_row(212, f'<text x="66" y="241" font-size="13" fill="{TEXT}">https://github.com/AbdulghaniKM/ChocolateBar</text><text x="434" y="228" text-anchor="end" font-size="10" fill="{SUBTLE}">32m</text>')}
+      {clip_row(270, f'<text x="66" y="299" font-size="13" fill="{TEXT}">npm run build &amp;&amp; npm run preview</text><text x="434" y="286" text-anchor="end" font-size="10" fill="{SUBTLE}">1h</text>')}
+    </g>
+  </g>
+
+  <rect x="500" y="40" width="370" height="244" rx="12" fill="url(#hubWall)" stroke="{BORDER}"/>
+  <rect x="500" y="268" width="370" height="16" fill="#0f2b2b"/>
+  <g opacity="0.85">
+    <rect x="660" y="272" width="8" height="8" rx="2" fill="#3aa0e0"/><rect x="674" y="272" width="8" height="8" rx="4" fill="#4285f4"/>
+    <rect x="688" y="272" width="8" height="8" rx="2" fill="#2b579a"/><rect x="702" y="272" width="8" height="8" rx="2" fill="#5865f2"/>
+  </g>
+  {window("Google Chrome", "#4285f4", (585, 90, 120, 140), (500, 40, 185, 228), 1.3)}
+  {window("Word", "#2b579a", (665, 100, 120, 140), (685, 40, 185, 228), 2.1)}
+  <text x="685" y="320" text-anchor="middle" font-size="12" fill="{SUBTLE}">One tap opens every app and snaps each window into place</text>
+</svg>
+"""
+
+
 def palette():
     swatches = [("Island", ISLAND), ("Raised", RAISED), ("Cream", TEXT), ("Caramel", ACCENT),
                 ("Mint", SUCCESS), ("Raspberry", "#ff7a85"), ("Blueberry", "#93acff"), ("Berry", "#c7a1ff")]
@@ -321,7 +459,7 @@ def palette():
 """
 
 
-for name, content in (("hero.svg", hero()), ("positions.svg", positions()), ("palette.svg", palette())):
+for name, content in (("hero.svg", hero()), ("positions.svg", positions()), ("palette.svg", palette()), ("hub.svg", hub())):
     with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as file:
         file.write(content)
     print(name, len(content))

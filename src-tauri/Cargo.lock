@@ -611,6 +611,7 @@ dependencies = [
  "keyvalues-parser",
  "log",
  "notify",
+ "png",
  "reqwest 0.12.28",
  "rustfft",
  "serde",

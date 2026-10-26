@@ -80,6 +80,25 @@ export interface IslandPosition {
   offsetX: number;
   offsetY: number;
 }
+export type WindowLayout =
+  | "none"
+  | "maximize"
+  | "left"
+  | "right"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
+export interface ShortcutApp {
+  appId: string;
+  name: string;
+  layout: WindowLayout;
+}
+export interface ShortcutGroup {
+  id: string;
+  name: string;
+  apps: ShortcutApp[];
+}
 export interface Settings {
   general: { hideInFullscreen: boolean; autostart: boolean; position: IslandPosition };
   hotkeys: { micMute: string; ocr: string };
@@ -92,6 +111,7 @@ export interface Settings {
   weather: { lat: number | null; lon: number | null; city: string | null; units: string };
   ocr: { autoClipboard: boolean; language: string };
   network: { showSpeed: boolean };
+  shortcuts: { groups: ShortcutGroup[] };
 }
 
 export type SettingsPatch = { [K in keyof Settings]?: Partial<Settings[K]> };
@@ -115,6 +135,7 @@ export const defaultSettings: Settings = {
   weather: { lat: null, lon: null, city: null, units: "metric" },
   ocr: { autoClipboard: false, language: "auto" },
   network: { showSpeed: true },
+  shortcuts: { groups: [] },
 };
 
 export const priorityRank: Record<Priority, number> = {

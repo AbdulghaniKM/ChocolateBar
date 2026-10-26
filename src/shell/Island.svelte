@@ -8,7 +8,7 @@
   import Pill from "./Pill.svelte";
   import IdlePill from "./IdlePill.svelte";
   import Card from "./Card.svelte";
-  import IdleCard from "./IdleCard.svelte";
+  import Hub from "./hub/Hub.svelte";
 
   const WHEEL_COOLDOWN_MS = 250;
 
@@ -16,7 +16,7 @@
   let lastWheelAt = 0;
 
   const position = $derived(settingsState.value.general.position);
-  const size = $derived(toRem(island.expanded ? cardSize(island.focused) : COMPACT_SIZE));
+  const size = $derived(toRem(island.expanded ? cardSize(island.focused, island.showingHub) : COMPACT_SIZE));
 
   onMount(() => {
     const stopListening = island.start();
@@ -65,10 +65,10 @@
   >
     {#if island.expanded}
       <div class="absolute inset-0" in:fade={{ duration: 180, delay: 140 }} out:fade={{ duration: 90 }}>
-        {#if island.focused}
+        {#if island.focused && !island.showingHub}
           <Card activity={island.focused} />
         {:else}
-          <IdleCard />
+          <Hub />
         {/if}
       </div>
     {:else}

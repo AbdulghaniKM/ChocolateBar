@@ -2,6 +2,7 @@
   import ChevronLeft from "@lucide/svelte/icons/chevron-left";
   import ChevronRight from "@lucide/svelte/icons/chevron-right";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
+  import LayoutGrid from "@lucide/svelte/icons/layout-grid";
   import type { Activity } from "../lib/contracts";
   import { island } from "../lib/island.svelte";
   import { registry } from "../features/registry";
@@ -36,6 +37,9 @@
           <ChevronRight class="size-4" />
         </button>
       {/if}
+      <button class={headerButton} type="button" aria-label="Shortcuts and clipboard" title="Shortcuts and clipboard" onclick={() => island.openHub()}>
+        <LayoutGrid class="size-4" />
+      </button>
       <button class={headerButton} type="button" aria-label="Collapse" onclick={() => island.setExpanded(false)}>
         <ChevronDown class="size-4" />
       </button>

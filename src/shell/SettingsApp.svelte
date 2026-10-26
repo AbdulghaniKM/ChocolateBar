@@ -1,30 +1,45 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getVersion } from "@tauri-apps/api/app";
+  import { onSettingsTab } from "../lib/ipc";
   import appIcon from "../../app-icon.svg";
   import { ACTIVITY_KINDS } from "../lib/contracts";
   import { settingsState } from "../lib/settings.svelte";
   import { registry } from "../features/registry";
   import Panel from "./settings/Panel.svelte";
   import PositionPicker from "./settings/PositionPicker.svelte";
-  import { GENERAL_TAB, TAB_META } from "./settings/tabs";
+  import ShortcutsEditor from "./settings/ShortcutsEditor.svelte";
+  import { GENERAL_TAB, SHORTCUTS_TAB, TAB_META } from "./settings/tabs";
 
   const featureTabs = ACTIVITY_KINDS.filter((kind) => registry[kind].Settings);
   const toggleableSources = [
     "media", "visualizer", "osd", "privacy", "buds", "bluetooth", "battery", "keyboard", "download",
-    "network", "claude", "notification", "ocr", "shelf", "sports", "timer", "weather", "game",
+    "network", "claude", "notification", "ocr", "shelf", "sports", "timer", "weather", "game", "clipboard",
+    "launcher",
   ];
+  const topTabs = [GENERAL_TAB, SHORTCUTS_TAB];
+  const allTabs = [...topTabs, ...featureTabs];
+  const tabFromHash = () => {
+    const requested = location.hash.split("/")[1];
+    return requested && allTabs.includes(requested as never) ? requested : GENERAL_TAB;
+  };
 
-  let activeTab = $state<string>(GENERAL_TAB);
+  let activeTab = $state<string>(tabFromHash());
   let version = $state("");
   const ActiveSettings = $derived(
-    activeTab === GENERAL_TAB ? undefined : registry[activeTab as (typeof ACTIVITY_KINDS)[number]].Settings,
+    topTabs.includes(activeTab) ? undefined : registry[activeTab as (typeof ACTIVITY_KINDS)[number]].Settings,
   );
 
   onMount(() => {
     const stopListening = settingsState.start();
     void getVersion().then((value) => (version = value));
-    return () => void stopListening.then((stop) => stop());
+    const stopTabEvents = onSettingsTab((tab) => {
+      if (allTabs.includes(tab as never)) activeTab = tab;
+    });
+    return () => {
+      void stopListening.then((stop) => stop());
+      void stopTabEvents.then((stop) => stop());
+    };
   });
 
   const isSourceEnabled = (name: string) => settingsState.value.sources[name] !== false;
@@ -41,9 +56,9 @@
       </div>
     </div>
     <div class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-4">
-      {#each [GENERAL_TAB, ...featureTabs] as tab, index (tab)}
+      {#each allTabs as tab, index (tab)}
         {@const Icon = TAB_META[tab as keyof typeof TAB_META].icon}
-        {#if index === 1}
+        {#if index === topTabs.length}
           <span class="eyebrow mt-4 mb-1.5 px-3">Activities</span>
         {/if}
         <button
@@ -65,7 +80,9 @@
   <main class="min-w-0 flex-1 overflow-y-auto">
     <div class="mx-auto flex max-w-[44rem] flex-col gap-5 px-8 py-8">
       <h1 class="font-display text-[1.625rem] font-semibold tracking-tight">{tabLabel(activeTab)}</h1>
-      {#if ActiveSettings}
+      {#if activeTab === SHORTCUTS_TAB}
+        <ShortcutsEditor />
+      {:else if ActiveSettings}
         <div class="feature-settings rounded-2xl border border-island-border bg-island-raised/60 p-5">
           <ActiveSettings />
         </div>
