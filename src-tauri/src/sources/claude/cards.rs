@@ -10,8 +10,7 @@ use crate::core::source::SourceContext;
 const CLAUDE_ACCENT: &str = "#d97757";
 const DONE_ACCENT: &str = "#22c55e";
 const ACTIVE_SESSION_TTL_MS: u64 = 12 * 60 * 60 * 1000;
-const DONE_TTL_MS: u64 = 8_000;
-const FOLLOW_UP_TTL_MS: u64 = 15_000;
+const FINISHED_TTL_MS: u64 = 2 * 60 * 60 * 1000;
 const INTERRUPTED_ACCENT: &str = "#f59e0b";
 pub const DISMISS_ACTION: &str = "dismiss";
 
@@ -43,6 +42,7 @@ fn session_activity(
         .accent(accent_for(state));
     let expanded = json!({
         "view": "session",
+        "sessionId": session_id,
         "state": status.label,
         "project": project,
         "statusLine": status.text,
@@ -124,10 +124,12 @@ fn accent_for(state: &SessionState) -> &'static str {
     }
 }
 
+/// Finished sessions stay around so the conversation can be read back, but step behind live activities.
 fn ttl_for(state: &SessionState) -> u64 {
     match state {
-        SessionState::Done | SessionState::Interrupted | SessionState::Idle => DONE_TTL_MS,
-        SessionState::AwaitingFollowUp { .. } => FOLLOW_UP_TTL_MS,
+        SessionState::Done | SessionState::Interrupted | SessionState::Idle | SessionState::AwaitingFollowUp { .. } => {
+            FINISHED_TTL_MS
+        }
         _ => ACTIVE_SESSION_TTL_MS,
     }
 }
@@ -135,7 +137,10 @@ fn ttl_for(state: &SessionState) -> u64 {
 fn prioritized(activity: Activity, state: &SessionState) -> Activity {
     match state {
         SessionState::WaitingForInput { .. } => activity.priority(Priority::High).alert(true),
-        SessionState::Done | SessionState::Interrupted => activity.priority(Priority::High),
+        SessionState::Done
+        | SessionState::Interrupted
+        | SessionState::Idle
+        | SessionState::AwaitingFollowUp { .. } => activity.priority(Priority::Ambient),
         _ => activity,
     }
 }
@@ -154,11 +159,11 @@ mod tests {
     }
 
     #[test]
-    fn finished_cards_expire_quickly() {
+    fn finished_cards_stay_readable_for_a_while() {
         let follow_up = SessionState::AwaitingFollowUp { message: String::new() };
         let finished = [SessionState::Done, SessionState::Interrupted, SessionState::Idle, follow_up];
         for state in finished {
-            assert!(ttl_for(&state) < 60_000);
+            assert!(ttl_for(&state) >= 60 * 60 * 1000);
         }
     }
 

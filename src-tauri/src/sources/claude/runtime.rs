@@ -1,9 +1,12 @@
+use std::collections::HashMap;
+use std::fs;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
 use super::cards::{apply_change, DISMISS_ACTION};
+use super::conversation;
 use super::hooks_install::{self, HookEndpoint, HooksStatus};
 use super::permission::{Decision, PermissionBroker};
 use super::server::RunningServer;
@@ -17,12 +20,15 @@ use crate::core::settings::Settings;
 use crate::core::source::SourceContext;
 
 const SESSION_POLL_INTERVAL: Duration = Duration::from_secs(2);
+const CONVERSATION_POLL_INTERVAL: Duration = Duration::from_millis(500);
 
 pub struct ClaudeRuntime {
     ctx: SourceContext,
     broker: Arc<PermissionBroker>,
     sessions: Arc<SessionTracker>,
     next_session_poll: Instant,
+    next_conversation_poll: Instant,
+    conversation_sizes: HashMap<String, u64>,
     endpoint: HookEndpoint,
     server: Option<RunningServer>,
 }
@@ -38,6 +44,8 @@ impl ClaudeRuntime {
             broker: Arc::default(),
             sessions: Arc::default(),
             next_session_poll: Instant::now(),
+            next_conversation_poll: Instant::now(),
+            conversation_sizes: HashMap::new(),
             endpoint,
             server: None,
         };
@@ -53,6 +61,24 @@ impl ClaudeRuntime {
             self.dismiss_session(key);
         } else if let Some(decision) = Decision::from_action(&request.action) {
             self.broker.resolve(key, decision);
+        }
+    }
+
+    /// Streams each session's conversation to the card whenever its transcript grows.
+    pub fn poll_conversations(&mut self) {
+        let now = Instant::now();
+        if now < self.next_conversation_poll {
+            return;
+        }
+        self.next_conversation_poll = now + CONVERSATION_POLL_INTERVAL;
+        let transcripts = self.sessions.transcripts();
+        self.conversation_sizes.retain(|id, _| transcripts.iter().any(|(session_id, _)| session_id == id));
+        for (session_id, path) in transcripts {
+            let size = fs::metadata(&path).map(|metadata| metadata.len()).unwrap_or(0);
+            if self.conversation_sizes.insert(session_id.clone(), size) == Some(size) {
+                continue;
+            }
+            self.ctx.emit(&json!({ "sessionId": session_id, "conversation": conversation::read(&path) }));
         }
     }
 
@@ -75,6 +101,7 @@ impl ClaudeRuntime {
             "session_defaults" => self.session_defaults(),
             "set_default_permission_mode" => self.set_default_permission_mode(&command.payload),
             "set_default_model" => self.set_default_model(&command.payload),
+            "conversation" => self.conversation(&command.payload),
             unknown => Err(AppError::Source(format!("unknown claude command {unknown}"))),
         };
         match outcome {
@@ -105,6 +132,12 @@ impl ClaudeRuntime {
         if let Some(change) = self.sessions.dismiss(session_id) {
             apply_change(&self.ctx, &change);
         }
+    }
+
+    fn conversation(&self, payload: &Value) -> AppResult<Value> {
+        let session_id = payload.get("sessionId").and_then(Value::as_str).unwrap_or_default();
+        let found = self.sessions.transcript_of(session_id).map(|path| conversation::read(&path)).unwrap_or_default();
+        Ok(serde_json::to_value(found)?)
     }
 
     fn install_hooks(&self) -> AppResult<Value> {

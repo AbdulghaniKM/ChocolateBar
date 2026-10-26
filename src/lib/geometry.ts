@@ -11,6 +11,7 @@ export const HUB_SIZE: Size = { width: 28, height: 22 };
 const DEFAULT_CARD: Size = { width: 28, height: 20 };
 const CARD_SIZES: Partial<Record<ActivityKind, Size>> = {
   media: { width: 28, height: 23 },
+  claude: { width: 30, height: 27 },
   osd: { width: 24, height: 14 },
   keyboard: { width: 22, height: 15 },
   battery: { width: 24, height: 17 },

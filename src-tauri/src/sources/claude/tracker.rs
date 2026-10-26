@@ -159,6 +159,18 @@ impl SessionTracker {
         (!tracked.dismissed).then(|| tracked.card_change(session_id))
     }
 
+    pub fn transcripts(&self) -> Vec<(String, PathBuf)> {
+        self.lock()
+            .iter()
+            .filter(|(_, tracked)| !tracked.dismissed)
+            .filter_map(|(id, tracked)| Some((id.clone(), tracked.watcher.as_ref()?.path().to_path_buf())))
+            .collect()
+    }
+
+    pub fn transcript_of(&self, session_id: &str) -> Option<PathBuf> {
+        self.lock().get(session_id)?.watcher.as_ref().map(|watcher| watcher.path().to_path_buf())
+    }
+
     pub fn dismiss(&self, session_id: &str) -> Option<CardChange> {
         let mut sessions = self.lock();
         sessions.get_mut(session_id).map(|tracked| {

@@ -1,4 +1,5 @@
 mod cards;
+mod conversation;
 mod hooks_install;
 mod payload;
 mod permission;
@@ -37,6 +38,7 @@ impl ActivitySource for ClaudeSource {
                 SourceEvent::Idle => {}
             }
             runtime.poll_sessions();
+            runtime.poll_conversations();
             if let Some(settings) = ctx.take_changed_settings() {
                 runtime.apply_settings(&settings);
             }

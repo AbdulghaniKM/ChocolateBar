@@ -1,5 +1,6 @@
 export interface SessionView {
   view: "session";
+  sessionId: string;
   state: "started" | "thinking" | "tool" | "waiting" | "done" | "interrupted" | "idle";
   project: string | null;
   statusLine: string;
@@ -44,3 +45,21 @@ const permissionModeLabels: Record<string, string> = {
 export const permissionModeLabel = (mode: string) => permissionModeLabels[mode] ?? mode;
 
 export const modelLabel = (model: string) => model.replace(/^claude-/, "");
+
+export type ToolStatus = "running" | "done" | "error";
+
+export type ChatItem =
+  | { kind: "user"; text: string }
+  | { kind: "assistant"; text: string }
+  | { kind: "tool"; id: string; name: string; summary: string; status: ToolStatus }
+  | { kind: "interrupted" };
+
+export interface Todo {
+  content: string;
+  status: "pending" | "in_progress" | "completed" | string;
+}
+
+export interface Conversation {
+  items: ChatItem[];
+  todos: Todo[];
+}
