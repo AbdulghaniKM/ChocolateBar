@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{Device, FromSample, InputCallbackInfo, SampleFormat, SizedSample, Stream, StreamConfig};
+use cpal::{Device, ErrorKind, FromSample, InputCallbackInfo, SampleFormat, SizedSample, Stream, StreamConfig};
 
 use super::ring::MonoRing;
 use crate::core::error::{AppError, AppResult};
@@ -82,10 +82,27 @@ where
     let failure_flag = Arc::clone(failed);
     let on_data = move |data: &[T], _: &InputCallbackInfo| push_converted(&sink, data, channels);
     let on_error = move |error: cpal::Error| {
-        log::warn!("visualizer loopback stream error: {error}");
-        failure_flag.store(true, Ordering::Relaxed);
+        if breaks_the_stream(error.kind()) {
+            log::warn!("visualizer loopback stream stopped: {error}");
+            failure_flag.store(true, Ordering::Relaxed);
+        } else {
+            log::trace!("visualizer loopback glitch: {error}");
+        }
     };
     device.build_input_stream::<T, _, _>(*config, on_data, on_error, None).map_err(source_error)
+}
+
+/// Loopback capture routinely reports underruns and reroutes while it keeps running; only a stream
+/// that can no longer deliver audio is rebuilt.
+fn breaks_the_stream(kind: ErrorKind) -> bool {
+    matches!(
+        kind,
+        ErrorKind::DeviceNotAvailable
+            | ErrorKind::StreamInvalidated
+            | ErrorKind::HostUnavailable
+            | ErrorKind::BackendError
+            | ErrorKind::Other
+    )
 }
 
 fn push_converted<T>(ring: &SharedRing, data: &[T], channels: usize)
@@ -101,4 +118,19 @@ where
 
 fn source_error(error: cpal::Error) -> AppError {
     AppError::Source(error.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn glitches_keep_the_stream_and_lost_devices_rebuild_it() {
+        for harmless in [ErrorKind::Xrun, ErrorKind::DeviceChanged, ErrorKind::RealtimeDenied, ErrorKind::DeviceBusy] {
+            assert!(!breaks_the_stream(harmless));
+        }
+        for fatal in [ErrorKind::DeviceNotAvailable, ErrorKind::StreamInvalidated] {
+            assert!(breaks_the_stream(fatal));
+        }
+    }
 }

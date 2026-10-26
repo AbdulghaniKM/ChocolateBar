@@ -28,15 +28,15 @@ Click the **grid button** on any card (or open the island when nothing is playin
 <img src="docs/showcase/hub.svg" width="900" alt="Tapping a Work shortcut opens Chrome on the left and Word on the right; the clipboard tab collects copied text, images and files" />
 </div>
 
-- **Shortcuts** open a whole setup with one tap: any combination of apps, as many groups as you like. Give each app a layout (left or right half, a quarter, or maximized) and its window snaps there once it opens. For example, **Gaming** opens Discord and Minecraft, and **Work** puts Chrome on the left and Word on the right. Pick from every app in your Start menu (desktop and Store apps), or paste a path to any `.exe`. Build them in Settings → **Shortcuts**.
+- **Shortcuts** open a whole setup with one tap: any combination of apps, as many groups as you like. Every app launches at once, and each window snaps into its layout (left or right half, a quarter, or maximized) the moment it appears. For example, **Gaming** opens Discord and Minecraft, and **Work** puts Chrome on the left and Word on the right. Pick from every app in your Start menu (desktop and Store apps), or paste a path to any `.exe`. Build them in Settings → **Shortcuts**.
 - **Clipboard** keeps the last 40 things you copied: text, images and files. Click one to copy it again, pin the ones you reuse, and clear the rest. Content that password managers mark as private is never recorded, and history lives in memory only, so it's gone when ChocolateBar quits.
 
 ## What it shows
 
 | Activity | In the island |
 | --- | --- |
-| **Media** | Artwork, seek bar, play/pause/skip, shuffle and repeat, synced lyrics, and an audio visualizer. Works with Spotify and browser tabs (YouTube in Chrome, Brave, Edge or Firefox), and lets you switch between them. |
-| **Claude Code** | Live session state, the current tool, model and permission mode. Approve or deny permission requests right from the island. |
+| **Media** | Artwork, seek bar, play/pause/skip, shuffle and repeat, synced lyrics, and visualizer bars that pulse with whatever you're playing. Works with Spotify and browser tabs (YouTube in Chrome, Brave, Edge or Firefox), and lets you switch between them. |
+| **Claude Code** | The session's conversation, like the VS Code panel: your messages, Claude's replies, and every tool call with live progress. Approve or deny permission requests, or type a reply that ChocolateBar hands straight to VS Code. |
 | **Volume & brightness** | Replaces the Windows volume flyout. |
 | **Privacy** | Lights up while an app uses your microphone or camera. Mute the mic with <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>M</kbd>. |
 | **Battery & Bluetooth** | Charging animation, low-battery alerts, and battery levels for headphones, mice and controllers. Galaxy Buds get per-bud levels and noise control. |
@@ -47,6 +47,12 @@ Click the **grid button** on any card (or open the island when nothing is playin
 | **File shelf** | Drop files on the island to park them, and drag them back out later. |
 | **Shortcuts & clipboard** | App groups that open and arrange themselves in one tap, plus a history of everything you copy. |
 | **Keyboard & network** | Input-language and Caps Lock changes, Wi-Fi and VPN events, and live up/down speed. |
+
+## Claude Code
+
+Install the hooks from Settings → **Claude Code** and every session shows up in the island. The card mirrors the conversation as it happens, keeps finished sessions readable, and lets you allow or deny tool requests without switching windows.
+
+To reply, type in the card and press <kbd>Enter</kbd>. Claude Code only accepts input in its own window, so ChocolateBar copies your message and brings that VS Code window forward. Press <kbd>Ctrl</kbd>+<kbd>V</kbd>, then <kbd>Enter</kbd>.
 
 ## Using it
 

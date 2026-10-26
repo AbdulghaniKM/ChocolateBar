@@ -58,6 +58,7 @@ impl Pipeline {
         }
         if self.active.as_ref().is_some_and(|active| active.capture.has_failed()) {
             self.active = None;
+            self.retry_at = Some(Instant::now() + REOPEN_DELAY);
         }
         if self.active.is_none() {
             self.try_start();
