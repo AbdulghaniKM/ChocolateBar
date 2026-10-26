@@ -5,6 +5,7 @@ import {
 } from "./contracts";
 import {
   cycleActivity,
+  focusActivity,
   listActivities,
   onActivityRemove,
   onActivityUpsert,
@@ -57,6 +58,14 @@ class Island {
     this.expanded = expanded;
     if (!expanded) this.showingHub = false;
     void setExpanded(expanded);
+  }
+
+  /** Shows an activity the user just started, leaving the hub so its card is visible straight away. */
+  async show(id: string) {
+    this.showingHub = false;
+    this.focusedId = id;
+    await focusActivity(id);
+    if (!this.expanded) this.setExpanded(true);
   }
 
   openHub(tab?: HubTab) {

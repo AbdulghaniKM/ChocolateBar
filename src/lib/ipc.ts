@@ -26,6 +26,8 @@ export const sourceCommand = <T = unknown>(
 export const cycleActivity = (direction: 1 | -1) =>
   invoke<void>("cycle_activity", { direction });
 
+export const focusActivity = (id: string) => invoke<void>("focus_activity", { id });
+
 export const setHitRegions = (rects: HitRect[]) =>
   invoke<void>("set_hit_regions", { rects });
 

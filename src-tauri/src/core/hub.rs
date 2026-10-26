@@ -29,6 +29,7 @@ enum HubMessage {
     Action(ActionRequest),
     Command(SourceCommand),
     Cycle(i32),
+    Focus(String),
     SetExpanded(bool),
     SetFullscreen(bool),
     SetPaused(bool),
@@ -79,6 +80,10 @@ impl HubHandle {
 
     pub fn cycle(&self, direction: i32) {
         self.post(HubMessage::Cycle(direction));
+    }
+
+    pub fn focus(&self, id: String) {
+        self.post(HubMessage::Focus(id));
     }
 
     pub fn set_expanded(&self, expanded: bool) {
@@ -157,6 +162,7 @@ impl Hub {
             HubMessage::Action(request) => self.route_action(request),
             HubMessage::Command(command) => self.route_command(command),
             HubMessage::Cycle(direction) => self.cycle(direction),
+            HubMessage::Focus(id) => self.focus(&id),
             HubMessage::SetExpanded(expanded) => self.set_expanded(expanded),
             HubMessage::SetFullscreen(fullscreen) => self.set_fullscreen(fullscreen),
             HubMessage::SetPaused(paused) => self.set_paused(paused),
@@ -284,6 +290,15 @@ impl Hub {
         let next = (current as i32 + direction.signum()).rem_euclid(candidates.len() as i32);
         self.pinned = true;
         self.announce_focus(Some(candidates[next as usize].clone()));
+    }
+
+    /// Something the user just started (a timer, say) takes over the island even while it is expanded and pinned.
+    fn focus(&mut self, id: &str) {
+        if !self.focusable_ids().iter().any(|candidate| candidate == id) {
+            return;
+        }
+        self.pinned = true;
+        self.announce_focus(Some(id.to_string()));
     }
 
     fn set_expanded(&mut self, expanded: bool) {

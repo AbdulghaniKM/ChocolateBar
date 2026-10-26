@@ -3,6 +3,7 @@
   import Brain from "@lucide/svelte/icons/brain";
   import Hourglass from "@lucide/svelte/icons/hourglass";
   import Timer from "@lucide/svelte/icons/timer";
+  import { island } from "../../lib/island.svelte";
   import { sourceCommand } from "../../lib/ipc";
 
   const COUNTDOWN_PRESET_MINUTES = [1, 5, 10, 25];
@@ -13,6 +14,7 @@
   async function start(timer: "countdown" | "stopwatch" | "pomodoro", seconds?: number) {
     try {
       await sourceCommand("timer", "start", { timer, seconds });
+      await island.show(`timer:${timer}`);
     } catch (error) {
       console.warn("timer start failed", error);
     }

@@ -48,6 +48,11 @@ pub fn set_hit_regions(regions: State<'_, HitRegions>, rects: Vec<HitRect>) {
 }
 
 #[tauri::command]
+pub fn focus_activity(hub: State<'_, HubHandle>, id: String) {
+    hub.focus(id);
+}
+
+#[tauri::command]
 pub fn set_island_size(width: f64, height: f64) {
     placement::request_size(native::island(), width, height);
 }
