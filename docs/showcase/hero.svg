@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="400" viewBox="0 0 880 400" font-family="'Segoe UI Variable Text','Segoe UI',Inter,system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif">
+  <title>ChocolateBar: the island morphs from a pill into a media card, then cycles through Claude Code and battery activities</title>
+  <defs>
+    <linearGradient id="desk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b2420"/>
+      <stop offset="1" stop-color="#16110f"/>
+    </linearGradient>
+    <radialGradient id="blobA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#eaa660" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#eaa660" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blobB" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#93acff" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#93acff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sheen" cx="0.5" cy="0" r="0.9">
+      <stop offset="0" stop-color="#eaa660" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#eaa660" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="art" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4bd81"/>
+      <stop offset="0.5" stop-color="#b8643a"/>
+      <stop offset="1" stop-color="#3b1c10"/>
+    </linearGradient>
+    <linearGradient id="lyricFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.7" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="lyricMask"><rect x="180" y="276" width="520" height="62" fill="url(#lyricFade)"/></mask>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect width="880" height="400" fill="url(#desk)"/>
+  <circle cx="160" cy="90" r="220" fill="url(#blobA)"/>
+  <circle cx="760" cy="300" r="240" fill="url(#blobB)"/>
+
+  <rect x="0" y="364" width="880" height="36" fill="#0f2b2b" opacity="0.92"/>
+  <g opacity="0.85">
+    <rect x="374" y="372" width="20" height="20" rx="5" fill="#3aa0e0"/>
+    <rect x="404" y="372" width="20" height="20" rx="5" fill="#6d5ae6"/>
+    <rect x="434" y="372" width="20" height="20" rx="5" fill="#f0b429"/>
+    <rect x="464" y="372" width="20" height="20" rx="5" fill="#e8562a"/>
+    <rect x="494" y="372" width="20" height="20" rx="10" fill="#1ed760"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="290" y="304" width="300" height="44" rx="22" fill="#120d0b"><animate attributeName="x" values="290;290;180;180;290;290" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="y" values="304;304;52;52;304;304" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="width" values="300;300;520;520;300;300" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="height" values="44;44;296;296;44;44" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="rx" values="22;22;30;30;22;22" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/></rect>
+  </g>
+  <rect x="290" y="304" width="300" height="44" rx="22" fill="url(#sheen)" stroke="#ffecdc" stroke-opacity="0.08"><animate attributeName="x" values="290;290;180;180;290;290" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="y" values="304;304;52;52;304;304" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="width" values="300;300;520;520;300;300" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="height" values="44;44;296;296;44;44" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/><animate attributeName="rx" values="22;22;30;30;22;22" keyTimes="0;0.1667;0.2083;0.5;0.5417;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/></rect>
+
+  <g id="media-pill">
+    <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.1583;0.1667;0.8833;0.9;1" dur="12s" repeatCount="indefinite"/>
+    <rect x="296" y="310" width="32" height="32" rx="9" fill="url(#art)"/>
+    <text x="338" y="324" font-size="13" font-weight="600" fill="#f8efe6">Midnight Cocoa</text>
+    <text x="338" y="339" font-size="11" fill="#bba99c">The Wrappers</text>
+    <rect x="552" width="3" rx="1.5" fill="#eaa660"><animate attributeName="height" values="4;14;6;11;4" dur="0.9s" repeatCount="indefinite"/><animate attributeName="y" values="330;320;328;323;330" dur="0.9s" repeatCount="indefinite"/></rect><rect x="557" width="3" rx="1.5" fill="#eaa660"><animate attributeName="height" values="6;18;8;15;6" dur="1.1s" repeatCount="indefinite"/><animate attributeName="y" values="328;316;326;319;328" dur="1.1s" repeatCount="indefinite"/></rect><rect x="562" width="3" rx="1.5" fill="#eaa660"><animate attributeName="height" values="3;12;5;9;3" dur="0.7s" repeatCount="indefinite"/><animate attributeName="y" values="331;322;329;325;331" dur="0.7s" repeatCount="indefinite"/></rect><rect x="567" width="3" rx="1.5" fill="#eaa660"><animate attributeName="height" values="5;16;7;13;5" dur="1.3s" repeatCount="indefinite"/><animate attributeName="y" values="329;318;327;321;329" dur="1.3s" repeatCount="indefinite"/></rect><rect x="572" width="3" rx="1.5" fill="#eaa660"><animate attributeName="height" values="4;11;6;8;4" dur="0.8s" repeatCount="indefinite"/><animate attributeName="y" values="330;323;328;326;330" dur="0.8s" repeatCount="indefinite"/></rect><rect x="577" width="3" rx="1.5" fill="#eaa660"><animate attributeName="height" values="6;15;8;12;6" dur="1.0s" repeatCount="indefinite"/><animate attributeName="y" values="328;319;326;322;328" dur="1.0s" repeatCount="indefinite"/></rect>
+  </g>
+
+  <g id="media-card" opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.2167;0.2417;0.4833;0.5;1" dur="12s" repeatCount="indefinite"/>
+    <path d="M206 72v-9l8-2v9" fill="none" stroke="#eaa660" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="204" cy="72" r="2.4" fill="#eaa660"/><circle cx="212" cy="70" r="2.4" fill="#eaa660"/>
+    <text x="224" y="75" font-size="11" font-weight="600" letter-spacing="0.9" fill="#8a786c">SPOTIFY</text>
+    <path d="M587 66l-4 4 4 4M651 66l4 4-4 4M672 67l4 4 4-4" fill="none" stroke="#bba99c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="619" y="74" text-anchor="middle" font-size="11" fill="#8a786c">1 / 3</text>
+
+    <rect x="212" y="100" width="76" height="76" rx="13" fill="url(#art)"/>
+    <circle cx="250" cy="138" r="18" fill="none" stroke="#fff3e4" stroke-opacity="0.35" stroke-width="2"/>
+    <text x="304" y="127" font-size="18" font-weight="600" fill="#f8efe6">Midnight Cocoa</text>
+    <text x="304" y="150" font-size="13" fill="#bba99c">The Wrappers</text>
+    <text x="304" y="169" font-size="12" fill="#8a786c">Sweet Static</text>
+
+    <text x="212" y="204" font-size="11" fill="#bba99c">1:06</text>
+    <rect x="246" y="198" width="390" height="4" rx="2" fill="#3a2c25"/>
+    <rect x="246" y="198" width="120" height="4" rx="2" fill="#f8efe6">
+      <animate attributeName="width" values="118;118;178;178" keyTimes="0;0.2083;0.5;1" dur="12s" repeatCount="indefinite"/>
+    </rect>
+    <text x="668" y="204" text-anchor="end" font-size="11" fill="#bba99c">3:31</text>
+
+    <g fill="none" stroke="#eaa660" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M332 234h4l10 12h4M332 246h4l10-12h4M347 231l3 3-3 3M347 243l3 3-3 3"/>
+    </g>
+    <circle cx="341" cy="254" r="1.6" fill="#eaa660"/>
+    <path d="M384 232v16M397 232l-11 8 11 8z" fill="#f8efe6" stroke="#f8efe6" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="440" cy="240" r="23" fill="#f8efe6"/>
+    <rect x="432" y="231" width="5" height="18" rx="1.5" fill="#120d0b"/>
+    <rect x="443" y="231" width="5" height="18" rx="1.5" fill="#120d0b"/>
+    <path d="M496 232v16M483 232l11 8-11 8z" fill="#f8efe6" stroke="#f8efe6" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M532 236h14l-3-3M548 244h-14l3 3" fill="none" stroke="#8a786c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <g mask="url(#lyricMask)">
+      <g>
+        <animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 -21;0 -21" keyTimes="0;0.3333;0.3583;1" calcMode="spline" keySplines="0 0 1 1;0.32 0.72 0 1;0 0 1 1" dur="12s" repeatCount="indefinite"/>
+        <text x="440" y="298" text-anchor="middle" font-size="13" font-weight="400" fill="#bba99c">We melted down the city lights</text><text x="440" y="319" text-anchor="middle" font-size="13" font-weight="600" fill="#f8efe6">and poured them into something sweet<animate attributeName="fill" values="#f8efe6;#f8efe6;#bba99c;#bba99c" keyTimes="0;0.3333;0.3583;1" dur="12s" repeatCount="indefinite"/></text><text x="440" y="340" text-anchor="middle" font-size="13" font-weight="600" fill="#bba99c">you said the night was ours to keep<animate attributeName="fill" values="#bba99c;#bba99c;#f8efe6;#f8efe6" keyTimes="0;0.3333;0.3583;1" dur="12s" repeatCount="indefinite"/></text><text x="440" y="361" text-anchor="middle" font-size="13" font-weight="400" fill="#bba99c">so I kept it in my coat pocket</text><text x="440" y="382" text-anchor="middle" font-size="13" font-weight="400" fill="#bba99c">warm until the morning came</text>
+      </g>
+    </g>
+  </g>
+
+  <g id="claude-pill" opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.55;0.5667;0.7;0.7167;1" dur="12s" repeatCount="indefinite"/>
+    <circle cx="312" cy="326" r="4" fill="#d97757" opacity="0.6">
+      <animate attributeName="r" values="4;10" dur="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="312" cy="326" r="4" fill="#d97757"/>
+    <text x="326" y="331" font-size="13" font-weight="600" fill="#f8efe6">ChocolateBar</text>
+    <text x="414" y="331" font-size="13" fill="#bba99c">Thinking…</text>
+    <rect x="520" y="315" width="56" height="22" rx="11" fill="#1f1714"/>
+    <text x="548" y="330" text-anchor="middle" font-size="11" fill="#bba99c">opus</text>
+  </g>
+
+  <g id="battery-pill" opacity="0">
+    <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.7167;0.7333;0.8667;0.8833;1" dur="12s" repeatCount="indefinite"/>
+    <rect x="308" y="319" width="30" height="15" rx="4" fill="none" stroke="#74d3a9" stroke-opacity="0.75" stroke-width="2"/>
+    <rect x="339.5" y="323.5" width="3" height="6" rx="1" fill="#74d3a9" fill-opacity="0.75"/>
+    <rect x="311" y="322" width="21" height="9" rx="2" fill="#74d3a9">
+      <animate attributeName="opacity" values="1;0.65;1" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+    <text x="352" y="331" font-size="14" font-weight="600" fill="#f8efe6">84%</text>
+    <text x="574" y="330" text-anchor="end" font-size="11" fill="#bba99c">Charging</text>
+  </g>
+</svg>
